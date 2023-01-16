@@ -354,7 +354,7 @@ class DBProvider{
     var uri = '${Preferences.servicesURL}/api/Job/GetIndicators/${g_customerId}/${g_storeId}/${g_stockDate}';
     var url = Uri.parse(uri);
     var response = await http.get(url);
-    print ('getIndicators: ${response.body}');
+    //print ('getIndicators: ${response.body}');
     final jobGetIndicators = jobGetIndicatorsFromJson(response.body);
 
     return jobGetIndicators;

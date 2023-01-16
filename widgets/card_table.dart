@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/jobGetIndicators_model.dart';
 import '../providers/job_indicators_provider.dart';
 
-class CardTable extends StatelessWidget {
+class CardTable extends StatefulWidget {
   const CardTable({Key? key}) : super(key: key);
+
+  @override
+  State<CardTable> createState() => _CardTableState();
+}
+
+class _CardTableState extends State<CardTable> {
+  var currencyFormatter = NumberFormat('#,##0.00', 'es_MX');
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +43,7 @@ class CardTable extends StatelessWidget {
                             text3: 'Progress: ${(jobIndicators != null)
                                                 ? jobIndicators.totalTags == 0
                                                     ?'0'
-                                                    :(jobIndicators.countedTags * 100 / jobIndicators.totalTags ).toString()
+                                                    :(jobIndicators.countedTags * 100 / jobIndicators.totalTags ).toStringAsFixed(1)
                                                 :'0'}%',),
               ]
             ),
@@ -45,7 +53,7 @@ class CardTable extends StatelessWidget {
                     icon: Icons.attach_money,
                     text: 'Counted amount',
                     text2: '\$ ${(jobIndicators != null)
-                                ? jobIndicators.totalAmount
+                                ? currencyFormatter.format(jobIndicators.totalAmount)
                                 : '0'}',
                     text3: 'Progress in pieces: ${(jobIndicators != null)
                                                     ?jobIndicators.totalQuantity.round()
@@ -95,7 +103,7 @@ class CardTable extends StatelessWidget {
                                 :'0'
                             :'0',
                     text3: 'Total hours: ${(jobIndicators != null)
-                                          ?jobIndicators.totalHours
+                                          ?jobIndicators.totalHours.toStringAsFixed(1)
                                           :'0'}',),
                 ]
             ),
@@ -156,18 +164,41 @@ class _SingleCardDepartmants extends StatelessWidget {
                   :0,
               itemBuilder: (context, index) =>
                      ListTile(
-                    title: Text((indicators != null)
-                        ?'${indicators.departments[index].departmentId} '
-                         '${indicators.departments[index].departmentName} '
-                        :'',style: const TextStyle(color: Colors.white, fontSize: 14),
-                    ),
-                         subtitle: Text((indicators != null)
-                             ? '${indicators.departments[index].advance}%'
-                             :'' ,style: const TextStyle(color: Colors.white, fontSize: 14),
-                         )
-                     )
+                    title:
+                          Table(
+                            children:   [
+                              TableRow(
+                                  children : [
+                                    Center(
+                                      child: Text((indicators != null)
+                                          ?'${indicators.departments[index].departmentId} '
+                                          :'',style: const TextStyle(color: Colors.white, fontSize: 14),
+                                        ),
+                                    ),
+                                    Text((indicators != null)
+                                        ?'${indicators.departments[index].departmentName} '
+                                        :'',style: const TextStyle(color: Colors.white, fontSize: 14),
+                                    ),
+                                    Center(
+                                      child: Text((indicators != null)
+                                          ?'${indicators.departments[index].advance.toStringAsFixed(1)}%'
+                                          :'',style: const TextStyle(color: Colors.white, fontSize: 14),
+                                      ),
+                                    )
+                                  ],
+                                decoration: BoxDecoration(
 
-          )
+                                )
+                              ),
+                            ],
+                          ),
+
+                     ),
+                         /*subtitle: Text((indicators != null)
+                             ? '${indicators.departments[index].advance.toStringAsFixed(1)}%'
+                             :'' ,style: const TextStyle(color: Colors.white, fontSize: 14),
+                         )*/
+                     )
         ],
       ),
     );
