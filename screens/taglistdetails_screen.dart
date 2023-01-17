@@ -228,7 +228,6 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
       var tipoerror = await sendJobDetail(context, jobDetails);
 
       if (tipoerror == 0){
-
         final route = MaterialPageRoute(
             builder: (context) => const TagSearchScreen());
             Navigator.pushReplacement(context, route);
@@ -250,6 +249,41 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
                     SizedBox(height: 10),
                   ],
                 ),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('OK')),
+                ],
+              );
+            });
+        } // else if
+      else if (tipoerror == 2){
+        showDialog(
+            barrierDismissible: true,
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                elevation: 5,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadiusDirectional.circular(10)),
+                title: const Text('Alert'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Text('Tag was restarted by tomi admin.!!'),
+                    SizedBox(height: 10),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        final route = MaterialPageRoute(
+                            builder: (context) => const TagSearchScreen());
+                         Navigator.pushReplacement(context, route);
+                      },
+                      child: const Text('OK')),
+                ],
               );
             });
       }
@@ -269,7 +303,27 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
     var i = 0;
     var tipoerror = 0;
 
-    var url = Uri.parse('${Preferences.servicesURL}/api/Audit/GetJobDetailsAuditAsync'); // IOS
+    // actualizar el tag en tomi a estatus AuditToProcess (2)
+    var url = Uri.parse(
+        '${Preferences.servicesURL}/api/Audit/UpdateAuditTagAsync/${g_customerId}/${g_storeId}/${g_stockDate
+            .toString().substring(0, 10)}/${g_tagNumber}/1');
+    //print(url.toString());
+    try{
+      var response = await http.get(url);
+      if (response.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(response.body);
+        if (!data["success"]){
+            return 2;
+        }
+      }
+      //String error = data["error"];
+    }
+    on SocketException catch(e){
+      //print (e.toString());
+      tipoerror = 1;
+    }
+
+     url = Uri.parse('${Preferences.servicesURL}/api/Audit/GetJobDetailsAuditAsync'); // IOS
     for (i = 0; i < jobDetails.length; i++) {
       jobDetails[i].audit_Status = 3;
 
@@ -280,9 +334,7 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
       try {
         var response = await http.post(
             url,
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-            },
+            headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
             body: jsonEncode(jobDetails[i].toJson())
         );
       } on SocketException catch (e) {
@@ -295,19 +347,7 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
       }
       isLoading = false;
       setState(() {});
-    }
-
-    // actualizar el tag en tomi a estatus AuditToProcess (2)
-    url = Uri.parse(
-        '${Preferences.servicesURL}/api/Audit/UpdateAuditTagAsync/${g_customerId}/${g_storeId}/${g_stockDate
-            .toString().substring(0, 10)}/${g_tagNumber}/1');
-    //print(url.toString());
-    try{
-      var response = await http.get(url);}
-    on SocketException catch(e){
-      //print (e.toString());
-      tipoerror = 1;
-    }
+    } //for
     return tipoerror;
   }
 }

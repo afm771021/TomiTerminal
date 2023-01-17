@@ -117,7 +117,7 @@ class _CardTableState extends State<CardTable> {
                   color:Colors.green,
                   icon: Icons.bar_chart,
                   text: 'Advance of departments',
-                  indicators: jobIndicators!,
+                  indicators: jobIndicators,
                 ),
               ]
             )
@@ -186,9 +186,6 @@ class _SingleCardDepartmants extends StatelessWidget {
                                       ),
                                     )
                                   ],
-                                decoration: BoxDecoration(
-
-                                )
                               ),
                             ],
                           ),
