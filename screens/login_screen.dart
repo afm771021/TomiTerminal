@@ -234,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     }
     catch(e) {
-      print('Error ${e}');
+      //print('Error ${e}');
       showDialog(
           barrierDismissible: true,
           context: context,
