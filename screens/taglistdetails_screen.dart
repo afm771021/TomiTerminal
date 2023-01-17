@@ -97,13 +97,12 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
                                 },
                                 //leading: const Icon(Icons.person),
                                 title: Text(
-                                    'SKU: ${jobDetails[index].code} Desc.: ${jobDetails[index]
-                                        .description}'),
-                                subtitle: Text('Price:\$ ${currencyFormatter.format(jobDetails[index].sale_Price
-                                )} Shelf: ${jobDetails[index].shelf
-                                    .toString()} Qty: ${jobDetails[index].quantity
-                                    .toString()} QtyUpd: ${jobDetails[index].audit_New_Quantity
-                                    .toString()}'),
+                                    'SKU: ${jobDetails[index].code} Quantity: ${jobDetails[index].quantity
+                                        .toString()} Quantity Updated: ${jobDetails[index].audit_New_Quantity
+                                        .toString()}'),
+                                subtitle: Text('Desc.: ${jobDetails[index].description} Shelf: ${jobDetails[index].shelf
+                                    .toString()}    Price:\$ ${currencyFormatter.format(jobDetails[index].sale_Price
+                                )}'),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -330,13 +329,16 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
       if (jobDetails[i].audit_Action == 1) {
         jobDetails[i].audit_Status = 4;
       }
-
+      jobDetails[i].customer_Id;
+      //print(url.toString());
+      //print(jobDetails[i].toJson());
       try {
         var response = await http.post(
             url,
             headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
             body: jsonEncode(jobDetails[i].toJson())
         );
+
       } on SocketException catch (e) {
         //print(' Error en servicio .${e.toString()}');
         tipoerror = 1;

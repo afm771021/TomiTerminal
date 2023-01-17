@@ -116,18 +116,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<http.Response> login(String user, String inventorykey) async{
-    //var url = Uri.parse('http://10.0.2.2:8080/api/Audit/auditauthenticate'); // Android
-    var url = Uri.parse('${Preferences.servicesURL}/api/Audit/auditauthenticate'); // IOS
-    var response = await http.post(
-        url,
-        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
-        body: jsonEncode(<String, String>{
-          'name': user,
-          'inventorykey': inventorykey
-        }));
-    return response;
-  }
 
   String? get _errorText {
     // at any time, we can get the text from _controller.value.text
@@ -176,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       var url = Uri.parse('${Preferences.servicesURL}/api/Audit/auditauthenticate');
-      print(url);
+      //print(url);
       var respuesta = await http.post(
           url,
           headers: <String, String>{
@@ -186,7 +174,8 @@ class _LoginScreenState extends State<LoginScreen> {
             'name': name,
             'inventorykey': inventorykey
           }));
-      print(respuesta.statusCode);
+      //print(respuesta.statusCode);
+      //print(respuesta.body);
       if (respuesta.statusCode == 200) {
         var loginResponseBody = (jsonDecode(respuesta.body));
 
@@ -207,6 +196,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(height: 10),
                     ],
                   ),
+                  actions: [
+                    TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('OK')),
+                  ],
                 );
               });
         }
@@ -255,6 +251,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 10),
                 ],
               ),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('OK')),
+              ],
             );
           });
     } //catch

@@ -30,21 +30,13 @@ class _CardTableState extends State<CardTable> {
                 _SingleCard(color:Colors.orangeAccent,
                             icon: Icons.bar_chart,
                             text: 'Total Tags',
-                            text2: (jobIndicators != null)
-                                    ? jobIndicators.totalTags.round().toString()
-                                    : '0',
+                            text2: jobIndicators.totalTags.round().toString(),
                             text3: '',),
                 _SingleCard(color:Colors.pinkAccent,
                             icon: Icons.checklist,
                             text: 'Counted Tags',
-                            text2: (jobIndicators != null)
-                                    ? jobIndicators.countedTags.round().toString()
-                                    : '0',
-                            text3: 'Progress: ${(jobIndicators != null)
-                                                ? jobIndicators.totalTags == 0
-                                                    ?'0'
-                                                    :(jobIndicators.countedTags * 100 / jobIndicators.totalTags ).toStringAsFixed(1)
-                                                :'0'}%',),
+                            text2:  jobIndicators.countedTags.round().toString(),
+                            text3: 'Progress: ${(jobIndicators.countedTags * 100 / jobIndicators.totalTags ).toStringAsFixed(1)}%',),
               ]
             ),
             TableRow(
@@ -52,18 +44,13 @@ class _CardTableState extends State<CardTable> {
                   _SingleCard(color:Colors.green,
                     icon: Icons.attach_money,
                     text: 'Counted amount',
-                    text2: '\$ ${(jobIndicators != null)
-                                ? currencyFormatter.format(jobIndicators.totalAmount)
-                                : '0'}',
-                    text3: 'Progress in pieces: ${(jobIndicators != null)
-                                                    ?jobIndicators.totalQuantity.round()
-                                                    :'0'}',),
+                    text2: '\$ ${currencyFormatter.format(jobIndicators.totalAmount)}',
+                    text3: 'Progress in pieces: ${jobIndicators.totalQuantity.round()}',
+                  ),
                   _SingleCard(color:Colors.lightBlueAccent,
                     icon: Icons.rule,
                     text: 'Pending Tags',
-                    text2: (jobIndicators != null)
-                            ?jobIndicators.missingTags.round().toString()
-                            :'0',
+                    text2: jobIndicators.missingTags.round().toString(),
                     text3: '',),
                 ]
             ),
@@ -72,16 +59,12 @@ class _CardTableState extends State<CardTable> {
                   _SingleCard(color:Colors.purple,
                     icon: Icons.checklist,
                     text: 'Audited Tags',
-                    text2: (jobIndicators != null)
-                            ?jobIndicators.totalAuditedTags.round().toString()
-                            :'0',
+                    text2: jobIndicators.totalAuditedTags.round().toString(),
                     text3: '',),
                   _SingleCard(color:Colors.black38,
                     icon: Icons.punch_clock_outlined,
                     text: 'Audit tags in progress',
-                    text2: (jobIndicators != null)
-                            ?jobIndicators.auditInProgressTags.round().toString()
-                            :'0',
+                    text2: jobIndicators.auditInProgressTags.round().toString(),
                     text3: '',),
                 ]
             ),
@@ -90,21 +73,18 @@ class _CardTableState extends State<CardTable> {
                   _SingleCard(color:Colors.orangeAccent,
                     icon: Icons.bar_chart,
                     text: 'Total pieces',
-                    text2: (jobIndicators != null)
-                            ?jobIndicators.totalQuantity.round().toString()
-                            :'0',
+                    text2: jobIndicators.totalQuantity.round().toString(),
                     text3: '',),
                   _SingleCard(color:Colors.orangeAccent,
                     icon: Icons.punch_clock_outlined,
                     text: 'Pieces per hour',
                     text2: (jobIndicators != null)
-                            ?( jobIndicators.totalHours > 0 )
-                                ? ( jobIndicators.totalQuantity / jobIndicators.totalHours ).round().toString()
-                                :'0'
-                            :'0',
-                    text3: 'Total hours: ${(jobIndicators != null)
-                                          ?jobIndicators.totalHours.toStringAsFixed(1)
-                                          :'0'}',),
+                        ?( jobIndicators.totalHours > 0 )
+                          ? ( jobIndicators.totalQuantity / jobIndicators.totalHours ).round().toString()
+                          :'0'
+                        :'0',
+                    text3: 'Total hours: ${jobIndicators.totalHours.toStringAsFixed(1)}',
+                  ),
                 ]
             ),
           ],
