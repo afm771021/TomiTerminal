@@ -493,6 +493,9 @@ DEPARTMENTS
   }
 
   Future<int> downloadDepartments() async{
+    final db = await database;
+    await db?.delete('DEPARTMENTS');
+
     var i = 0;
     var uri = '${Preferences.servicesURL}/api/ProgramTerminal/GetDepartments/${g_inventorykey}';
     var url = Uri.parse(uri);
@@ -507,7 +510,10 @@ DEPARTMENTS
     return i;
   }
 
-  Future<int> downloadAlerts() async{
+    Future<int> downloadAlerts() async{
+    final db = await database;
+    await db?.delete('ALERT_PARAMETER');
+
     var i = 0;
     var uri = '${Preferences.servicesURL}/api/ProgramTerminal/GetAlerts/${g_inventorykey}';
     var url = Uri.parse(uri);

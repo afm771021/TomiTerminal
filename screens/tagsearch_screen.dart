@@ -69,7 +69,7 @@ class _TagSearchScreenState extends State<TagSearchScreen> {
       ),
       drawer: const TomiTerminalMenu(),
       body: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.fromLTRB(40,30,40,0),
         child: Column(
           children: [
             const SizedBox(height: 20,),

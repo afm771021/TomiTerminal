@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+//Background
 class Background extends StatelessWidget {
   const Background({Key? key}) : super(key: key);
 
@@ -9,7 +9,7 @@ class Background extends StatelessWidget {
         gradient:  LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          stops: [0.2, 0.8],
+          stops: const [0.2, 0.8],
           colors:[
             Colors.blue.shade100,
             Colors.blue.shade200,

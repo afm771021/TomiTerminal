@@ -24,14 +24,13 @@ class _LoginScreenState extends State<LoginScreen> {
   static const String  _title = '';
   bool isLoading = false;
 
-  @override
+  /*@override
   void initState() {
     // TODO: implement initState
     super.initState();
     nameController.text = 'antonio';
     passwordController.text =  '0729';
-  }
-
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -41,78 +40,75 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
         appBar: AppBar(title: const Text(_title)),
         drawer: const TomiTerminalMenu(),
-        body: Padding(
-          padding: const EdgeInsets.all(10),
+        body:  Padding(
+          padding: const EdgeInsets.fromLTRB(40,40,40,0),
           child: Stack(
-            children: [
-              ListView(
-                children: <Widget>[
-                  const Image(image: AssetImage('assets/top+bar.png'),
-                  ),
-                  Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.all(10),
-                      child: const Text(
-                        'Audit',
-                        style: TextStyle(fontSize: 20),
-                      )),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    child: TextField(
+                children: [
+                  ListView(
+                    children: <Widget>[
+                      const Image(image: AssetImage('assets/top+bar.png'),),
+                      Container(
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.all(10),
+                          child: const Text(
+                            'Tomi Audit',
+                            style: TextStyle(fontSize: 25, fontStyle: FontStyle.normal),
+                          )),
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(40, 30, 40, 0),
+                        child: TextField(
 
-                      autocorrect: false,
-                      controller: nameController,
-                      decoration:   InputDecoration(
-                        border:  const OutlineInputBorder(),
-                        labelText: 'Enter your name',
-                        prefixIcon: const Icon(Icons.person),
-                        errorText: _errorText,
+                          autocorrect: false,
+                          controller: nameController,
+                          decoration:   InputDecoration(
+                            border:  const OutlineInputBorder(),
+                            labelText: 'Enter your name',
+                            prefixIcon: const Icon(Icons.person),
+                            errorText: _errorText,
+                          ),
+                          onChanged: (_) => setState(() {}),
+                        ),
                       ),
-                      onChanged: (_) => setState(() {}),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-                    child: TextField(
-                      autocorrect: false,
-                      obscureText: true,
-                      controller: passwordController,
-                      decoration:  InputDecoration(
-                        border: const OutlineInputBorder(),
-                        labelText: 'Enter valid inventorykey',
-                          prefixIcon: const Icon(Icons.shopping_cart_rounded),
-                        errorText: _errorTextik,
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(40, 10, 40, 0),
+                        child: TextField(
+                          autocorrect: false,
+                          obscureText: true,
+                          controller: passwordController,
+                          decoration:  InputDecoration(
+                            border: const OutlineInputBorder(),
+                            labelText: 'Enter valid inventorykey',
+                              prefixIcon: const Icon(Icons.shopping_cart_rounded),
+                            errorText: _errorTextik,
+                          ),
+                          onChanged: (_) => setState(() {}),
+                        ),
                       ),
-                      onChanged: (_) => setState(() {}),
-                    ),
+                      Container(
+                          height: 60,
+                          padding: const EdgeInsets.fromLTRB(90, 10, 90, 0),
+                          child: ElevatedButton(
+                            child: const Text('Start audit'),
+                            onPressed: nameController.value.text.isNotEmpty && passwordController.value.text.isNotEmpty && !isLoading
+                                ? _submit
+                                : null,
+                          )
+                      ),
+                      const SizedBox(height: 50,),
+                      const Center(child: Text ('(Ver. 1.0.1)', style: TextStyle(fontSize: 10),)),
+                    ],
                   ),
-                  /*TextButton(
-                    onPressed: () {
-                    },
-                    child: const Text('Forgot Password',),
-                  ),*/
-                  Divider(),
-                  Container(
-                      height: 50,
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      child: ElevatedButton(
-                        child: const Text('Start audit'),
-                        onPressed: nameController.value.text.isNotEmpty && passwordController.value.text.isNotEmpty && !isLoading
-                            ? _submit
-                            : null,
-                      )
-                  ),
+                   if ( isLoading )
+                   Positioned(
+                      bottom: 40,
+                      left: size.width * 0.5 - 40,
+                      child: const _LoadingIcon()
+                  )
                 ],
               ),
-               if ( isLoading )
-               Positioned(
-                  bottom: 40,
-                  left: size.width * 0.5 - 40,
-                  child: const _LoadingIcon()
-              )
-            ],
-          )
-        )
+        ),
+
+
     );
   }
 
@@ -207,34 +203,60 @@ class _LoginScreenState extends State<LoginScreen> {
               });
         }
         else {
-          JobAudit ja = JobAudit(userName: name,
-              inventoryKey: inventorykey,
-              created_At: DateTime.now());
-          // Insertar usuario en la BD
-          DBProvider.db.nuevoJobAudit(ja);
+          int totalDepartments = await DBProvider.db.downloadDepartments();
+          int totalalerts = await DBProvider.db.downloadAlerts();
 
-          setState(() {
-            g_login = true;
-            g_user = name;
-            g_inventorykey = inventorykey;
-            g_customerId = loginResponseBody['customerId'].round();
-            g_storeId = loginResponseBody['storeId'].round();
-            g_stockDate = DateTime.parse(loginResponseBody['stockDate']);
-          });
+          if (totalDepartments > 0 && totalalerts > 0){
+            JobAudit ja = JobAudit(userName: name,
+                inventoryKey: inventorykey,
+                created_At: DateTime.now());
+            // Insertar usuario en la BD
+            DBProvider.db.nuevoJobAudit(ja);
 
-          DBProvider.db.deleteAllDepartmentAudit();
-          DBProvider.db.deleteAllAlertAudit();
-
-          DBProvider.db.downloadDepartments();
-          DBProvider.db.downloadAlerts();
-
-          final route = MaterialPageRoute(builder: (context) => const TagSearchScreen());
-          Navigator.pushReplacement(context, route);
+            setState(() {
+              g_login = true;
+              g_user = name;
+              g_inventorykey = inventorykey;
+              g_customerId = loginResponseBody['customerId'].round();
+              g_storeId = loginResponseBody['storeId'].round();
+              g_stockDate = DateTime.parse(loginResponseBody['stockDate']);
+            });
+            final route = MaterialPageRoute(builder: (context) => const TagSearchScreen());
+            Navigator.pushReplacement(context, route);
+          }
+          else
+            {
+              showDialog(
+                  barrierDismissible: true,
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      elevation: 5,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusDirectional.circular(10)),
+                      title: const Text('Alert'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Text('Can not load catalogs (Departments, Alerts) !!'),
+                          SizedBox(height: 10),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('OK')),
+                      ],
+                    );
+                  });
+            }
         }
       }
     }
     catch(e) {
-      //print('Error ${e}');
+     // print('Error ${e}');
       showDialog(
           barrierDismissible: true,
           context: context,
