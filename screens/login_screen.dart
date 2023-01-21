@@ -203,9 +203,10 @@ class _LoginScreenState extends State<LoginScreen> {
               });
         }
         else {
+          //print('totalalerts');
           int totalDepartments = await DBProvider.db.downloadDepartments();
           int totalalerts = await DBProvider.db.downloadAlerts();
-
+          //print(totalalerts);
           if (totalDepartments > 0 && totalalerts > 0){
             JobAudit ja = JobAudit(userName: name,
                 inventoryKey: inventorykey,
@@ -223,6 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
             });
             final route = MaterialPageRoute(builder: (context) => const TagSearchScreen());
             Navigator.pushReplacement(context, route);
+          //print('totalalerts');
           }
           else
             {
@@ -256,7 +258,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     }
     catch(e) {
-     // print('Error ${e}');
+      //print('Error ${e}');
       showDialog(
           barrierDismissible: true,
           context: context,

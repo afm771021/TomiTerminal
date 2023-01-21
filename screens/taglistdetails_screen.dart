@@ -97,8 +97,8 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
                                 },
                                 //leading: const Icon(Icons.person),
                                 title: Text(
-                                    'SKU: ${jobDetails[index].code} Quantity: ${jobDetails[index].quantity
-                                        .toString()} Quantity Updated: ${jobDetails[index].audit_New_Quantity
+                                    'SKU: ${jobDetails[index].sku} Code: ${jobDetails[index].code} Qty: ${jobDetails[index].quantity
+                                        .toString()} QtyUp: ${jobDetails[index].audit_New_Quantity
                                         .toString()}'),
                                 subtitle: Text('Desc.: ${jobDetails[index].description} Shelf: ${jobDetails[index].shelf
                                     .toString()}    Price:\$ ${currencyFormatter.format(jobDetails[index].sale_Price
