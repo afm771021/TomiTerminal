@@ -62,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           controller: nameController,
                           decoration:   InputDecoration(
                             border:  const OutlineInputBorder(),
-                            labelText: 'Enter your name',
+                            labelText: 'Enter your user',
                             prefixIcon: const Icon(Icons.person),
                             errorText: _errorText,
                           ),
@@ -95,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           )
                       ),
                       const SizedBox(height: 50,),
-                      const Center(child: Text ('(Ver. 1.0.1)', style: TextStyle(fontSize: 10),)),
+                      const Center(child: Text ('(Ver. 1.0.2)', style: TextStyle(fontSize: 10),)),
                     ],
                   ),
                    if ( isLoading )
@@ -145,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     isLoading = true;
     setState(() {});
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
 
     if (_errorText == null && _errorTextik == null) {
       // notify the parent widget via the onSubmit callback
@@ -160,7 +160,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       var url = Uri.parse('${Preferences.servicesURL}/api/Audit/auditauthenticate');
-      //print(url);
       var respuesta = await http.post(
           url,
           headers: <String, String>{
@@ -170,12 +169,11 @@ class _LoginScreenState extends State<LoginScreen> {
             'name': name,
             'inventorykey': inventorykey
           }));
-      //print(respuesta.statusCode);
-      //print(respuesta.body);
+
       if (respuesta.statusCode == 200) {
         var loginResponseBody = (jsonDecode(respuesta.body));
-
-        if (loginResponseBody['inventorykey'] == null) {
+        print(respuesta.body);
+        if (!loginResponseBody['success']) {
           showDialog(
               barrierDismissible: true,
               context: context,
@@ -187,9 +185,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   title: const Text('Alert'),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Text('Inventory key not found !!'),
-                      SizedBox(height: 10),
+                    children:  [
+                      Text(loginResponseBody['error']),
+                      const SizedBox(height: 10),
                     ],
                   ),
                   actions: [
@@ -203,10 +201,18 @@ class _LoginScreenState extends State<LoginScreen> {
               });
         }
         else {
-          //print('totalalerts');
+          setState(() {
+            g_login = true;
+            g_user = name;
+            g_inventorykey = inventorykey;
+            g_customerId = loginResponseBody['customerId'].round();
+            g_storeId = loginResponseBody['storeId'].round();
+            g_stockDate = DateTime.parse(loginResponseBody['stockDate']);
+          });
+
           int totalDepartments = await DBProvider.db.downloadDepartments();
           int totalalerts = await DBProvider.db.downloadAlerts();
-          //print(totalalerts);
+
           if (totalDepartments > 0 && totalalerts > 0){
             JobAudit ja = JobAudit(userName: name,
                 inventoryKey: inventorykey,
@@ -214,14 +220,6 @@ class _LoginScreenState extends State<LoginScreen> {
             // Insertar usuario en la BD
             DBProvider.db.nuevoJobAudit(ja);
 
-            setState(() {
-              g_login = true;
-              g_user = name;
-              g_inventorykey = inventorykey;
-              g_customerId = loginResponseBody['customerId'].round();
-              g_storeId = loginResponseBody['storeId'].round();
-              g_stockDate = DateTime.parse(loginResponseBody['stockDate']);
-            });
             final route = MaterialPageRoute(builder: (context) => const TagSearchScreen());
             Navigator.pushReplacement(context, route);
           //print('totalalerts');

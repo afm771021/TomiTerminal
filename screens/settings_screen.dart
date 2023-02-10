@@ -103,7 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       if( isLoading ) return;
                                       isLoading = true;
                                       setState(() {});
-                                      await Future.delayed(const Duration(seconds: 2));
+                                      await Future.delayed(const Duration(seconds: 1));
                                       DBProvider.db.deleteAllJobDetailAudit();
                                       DBProvider.db.deleteAllJobAudit();
                                       //DBProvider.db.deleteAllMasterFileAudit();

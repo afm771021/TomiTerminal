@@ -500,7 +500,6 @@ DEPARTMENTS
     var uri = '${Preferences.servicesURL}/api/ProgramTerminal/GetDepartments/${g_inventorykey}';
     var url = Uri.parse(uri);
     var response = await http.get(url);
-    //print(json.decode(response.body));
     final List parsedList = json.decode(response.body);
     List<JobDepartment> list = parsedList.map((e) => JobDepartment.fromJson(e)).toList();
 

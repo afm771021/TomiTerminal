@@ -293,45 +293,62 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
       List<jobDetailAudit> jobDetails) async {
 
     if( isLoading ) return -1;
-
     isLoading = true;
     setState(() {});
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
 
     //Enviar a la base de TOMI los registros con los cambios auditados
     var i = 0;
     var tipoerror = 0;
+    var url = Uri.parse('${Preferences.servicesURL}/api/Audit/GetJobDetailsAuditAsync'); // IOS
 
-    // actualizar el tag en tomi a estatus AuditToProcess (2)
-    var url = Uri.parse(
-        '${Preferences.servicesURL}/api/Audit/UpdateAuditTagAsync/${g_customerId}/${g_storeId}/${g_stockDate
-            .toString().substring(0, 10)}/${g_tagNumber}/1');
-    //print(url.toString());
-    try{
-      var response = await http.get(url);
-      if (response.statusCode == 200) {
-        Map<String, dynamic> data = jsonDecode(response.body);
-        if (!data["success"]){
-            return 2;
-        }
+      for (i = 0; i < jobDetails.length; i++) {
+        jobDetails[i].audit_Status = (jobDetails[i].audit_Action == 1)?jobDetails[i].audit_Status = 4:jobDetails[i].audit_Status = 3;
+        print(jobDetails[i].toJson());
       }
-      //String error = data["error"];
-    }
-    on SocketException catch(e){
-      //print (e.toString());
-      tipoerror = 1;
-    }
 
-     url = Uri.parse('${Preferences.servicesURL}/api/Audit/GetJobDetailsAuditAsync'); // IOS
-    for (i = 0; i < jobDetails.length; i++) {
+      try {
+        List jsonTags = jobDetails.map((jobDetail) => jobDetail.toJson()).toList();
+        var params = {
+          'customerId':g_customerId,
+          'storeId': g_storeId,
+          'stockDate' : g_stockDate.toString(),
+          'tagNumber' : g_tagNumber,
+          'jobDetailAuditModel' : jobDetails
+        };
+        print (params);
+        var response = await http.post(
+            url,
+            headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
+            body: json.encode(params)
+            );
+        if (response.statusCode == 200) {
+          Map<String, dynamic> data = jsonDecode(response.body);
+          print(' data .${data}');
+          if (!data["success"]){
+            tipoerror = 2;
+          }
+        }
+      } on SocketException catch (e) {
+        print(' Error en servicio .${e.toString()}');
+        tipoerror = 1;
+      }
+      catch(e){
+        print(' JOB_DETAILS_AUDIT already exist in TOMI .${e.toString()}');
+        tipoerror = 2;
+      }
+      isLoading = false;
+      setState(() {});
+
+    /*for (i = 0; i < jobDetails.length; i++) {
       jobDetails[i].audit_Status = 3;
 
       if (jobDetails[i].audit_Action == 1) {
         jobDetails[i].audit_Status = 4;
       }
       jobDetails[i].customer_Id;
-      //print(url.toString());
-      //print(jobDetails[i].toJson());
+      print(url.toString());
+      print(jobDetails[i].toJson());
       try {
         var response = await http.post(
             url,
@@ -350,6 +367,27 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
       isLoading = false;
       setState(() {});
     } //for
+
+    // actualizar el tag en tomi a estatus AuditToProcess (2)
+     url = Uri.parse(
+        '${Preferences.servicesURL}/api/Audit/UpdateAuditTagAsync/${g_customerId}/${g_storeId}/${g_stockDate
+            .toString().substring(0, 10)}/${g_tagNumber}/1');
+    //print(url.toString());
+    try{
+      var response = await http.get(url);
+      if (response.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(response.body);
+        if (!data["success"]){
+          return 2;
+        }
+      }
+      //String error = data["error"];
+    }
+    on SocketException catch(e){
+      //print (e.toString());
+      tipoerror = 1;
+    }*/
+
     return tipoerror;
   }
 }
