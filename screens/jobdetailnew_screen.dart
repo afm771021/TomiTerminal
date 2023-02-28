@@ -180,11 +180,10 @@ class _JobDetailsNewScreenState extends State<JobDetailsNewScreen> {
               print ('sale_Price ${jdetailaudit.sale_Price}');
               print ('description ${jdetailaudit.description}');
               print ('department ${jdetailaudit.department_Id}');*/
-              print ('no existe, ya tengo los valores');
+              //print ('no existe, ya tengo los valores');
 
               existDepartment = (await DBProvider.db.existDepartment(jdetailaudit))!;
               if (existDepartment){
-                //print ('si existe el departamento');
                 DBProvider.db.nuevoJobDetailAudit(jdetailaudit);
                 Navigator.pushReplacementNamed(context, 'TagListDetails');
               }
@@ -215,11 +214,7 @@ class _JobDetailsNewScreenState extends State<JobDetailsNewScreen> {
               }
             }
             else{
-                /*print ('department_Id: ${jdetailaudit.department_Id}');
-                print ('sale_Price ${jdetailaudit.sale_Price}');
-                print ('description ${jdetailaudit.description}');
-                print ('department ${jdetailaudit.department_Id}');
-                print ('si existe');*/
+                //jdetailaudit.sku = jdetailaudit.code.toUpperCase();
                 DBProvider.db.nuevoJobDetailAudit(jdetailaudit);
                 Navigator.pushReplacementNamed(context, 'TagListDetails');
             }
@@ -252,7 +247,6 @@ class AddForm extends StatelessWidget {
                 TextFormField(
                   decoration: const InputDecoration(
                     icon: Icon(Icons.qr_code),
-                    //hintText: 'What do people call you?',
                     labelText: 'SKU',
                   ),
                   onChanged: (String? value){
@@ -281,7 +275,6 @@ class AddForm extends StatelessWidget {
                 TextFormField(
                   decoration: const InputDecoration(
                     icon: Icon(Icons.store),
-                    //hintText: 'What do people call you?',
                     labelText: 'Shelf ',
                   ),
                   onChanged: (String? value){
@@ -292,7 +285,6 @@ class AddForm extends StatelessWidget {
                 DropdownButtonFormField(
                   decoration: const InputDecoration(
                     icon: Icon(Icons.swipe_up),
-                    //hintText: 'What do people call you?',
                     labelText: 'Reason Change',
                   ),
 

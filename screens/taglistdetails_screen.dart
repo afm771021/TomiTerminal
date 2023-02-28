@@ -32,6 +32,7 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
 
     final jobDetailsListProvider = Provider.of<JobDetailsListProvider>(
         context, listen: true);
+
     jobDetailsListProvider.getJobDetails(
         g_customerId, g_storeId, g_stockDate, g_tagNumber, g_operation);
     final jobDetails = jobDetailsListProvider.jobDetails;
@@ -316,7 +317,8 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
           'tagNumber' : g_tagNumber,
           'jobDetailAuditModel' : jobDetails
         };
-        print (params);
+        print(' params:${json.encode(params)}');
+        print(' jobDetailAuditModel:${json.encode(jobDetails)}');
         var response = await http.post(
             url,
             headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
@@ -324,13 +326,13 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
             );
         if (response.statusCode == 200) {
           Map<String, dynamic> data = jsonDecode(response.body);
-          print(' data .${data}');
+          //print(' data .${data}');
           if (!data["success"]){
             tipoerror = 2;
           }
         }
       } on SocketException catch (e) {
-        print(' Error en servicio .${e.toString()}');
+        //print(' Error en servicio .${e.toString()}');
         tipoerror = 1;
       }
       catch(e){
