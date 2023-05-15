@@ -36,12 +36,23 @@ class TomiTerminalMenu extends StatelessWidget {
             ),
           ),
           Visibility(
-            visible: (g_login)?true:false,
+            visible: (g_login && g_auditType == 1)?true:false,
             child: ListTile(
               leading:  const Icon( Icons.search, color: Colors.indigo,),
               title:  const Text('Search Tags'),
               onTap: (){
                 final route = MaterialPageRoute(builder: (context) => const TagSearchScreen());
+                Navigator.pushReplacement(context, route);
+              },
+            ),
+          ),
+          Visibility(
+            visible: (g_login && g_auditType == 2)?true:false,
+            child: ListTile(
+              leading:  const Icon( Icons.search, color: Colors.indigo,),
+              title:  const Text('Search Department'),
+              onTap: (){
+                final route = MaterialPageRoute(builder: (context) => const DepartmentSearchScreen());
                 Navigator.pushReplacement(context, route);
               },
             ),

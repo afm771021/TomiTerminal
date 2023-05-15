@@ -207,25 +207,39 @@ class _LoginScreenState extends State<LoginScreen> {
             g_inventorykey = inventorykey;
             g_customerId = loginResponseBody['customerId'].round();
             g_storeId = loginResponseBody['storeId'].round();
+            g_auditType = loginResponseBody['auditType'].round();
+            print('g_auditType: ${g_auditType}');
             g_stockDate = DateTime.parse(loginResponseBody['stockDate']);
           });
 
           int totalDepartments = await DBProvider.db.downloadDepartments();
           int totalalerts = await DBProvider.db.downloadAlerts();
 
-          if (totalDepartments > 0 && totalalerts > 0){
-            JobAudit ja = JobAudit(userName: name,
-                inventoryKey: inventorykey,
-                created_At: DateTime.now());
-            // Insertar usuario en la BD
-            DBProvider.db.nuevoJobAudit(ja);
+          print('totalDepartments: ${totalDepartments}');
+          print('totalalerts: ${totalalerts}');
 
-            final route = MaterialPageRoute(builder: (context) => const TagSearchScreen());
-            Navigator.pushReplacement(context, route);
-          //print('totalalerts');
-          }
-          else
-            {
+          if (g_auditType == 1) {
+            if (totalDepartments > 0 && totalalerts > 0) {
+              JobAudit ja = JobAudit(userName: name,
+                  inventoryKey: inventorykey,
+                  created_At: DateTime.now());
+              // Insertar usuario en la BD
+              DBProvider.db.nuevoJobAudit(ja);
+
+              // Seleccionar la pantalla de busqueda según el tipo de auditoría.
+
+              final route = MaterialPageRoute(
+                  builder: (context) => const TagSearchScreen());
+              final department_route = MaterialPageRoute(
+                  builder: (context) => const DepartmentSearchScreen());
+
+              if (g_auditType == 1)
+                Navigator.pushReplacement(context, route);
+              else
+                Navigator.pushReplacement(context, department_route);
+              //print('totalalerts');
+            }
+            else {
               showDialog(
                   barrierDismissible: true,
                   context: context,
@@ -238,7 +252,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       content: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: const [
-                          Text('Can not load catalogs (Departments, Alerts) !!'),
+                          Text(
+                              'Can not load catalogs (Departments, Alerts) !!'),
                           SizedBox(height: 10),
                         ],
                       ),
@@ -252,6 +267,59 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                   });
             }
+          }
+          else if (g_auditType == 2){
+            if (totalDepartments > 0) {
+              JobAudit ja = JobAudit(userName: name,
+                  inventoryKey: inventorykey,
+                  created_At: DateTime.now());
+              // Insertar usuario en la BD
+              DBProvider.db.nuevoJobAudit(ja);
+
+              // Seleccionar la pantalla de busqueda según el tipo de auditoría.
+
+              final route = MaterialPageRoute(
+                  builder: (context) => const TagSearchScreen());
+              final department_route = MaterialPageRoute(
+                  builder: (context) => const DepartmentSearchScreen());
+
+              if (g_auditType == 1)
+                Navigator.pushReplacement(context, route);
+              else
+                Navigator.pushReplacement(context, department_route);
+              //print('totalalerts');
+            }
+            else {
+              showDialog(
+                  barrierDismissible: true,
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      elevation: 5,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusDirectional.circular(10)),
+                      title: const Text('Alert'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Text(
+                              'Can not load catalogs (Departments) !!'),
+                          SizedBox(height: 10),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('OK')),
+                      ],
+                    );
+                  });
+            }
+          }
+
+
         }
       }
     }
