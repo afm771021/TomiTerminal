@@ -13,6 +13,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/jobAlertParameter_model.dart';
+import '../models/jobAuditDepartment_model.dart';
 import '../models/jobDepartment_model.dart';
 import '../models/jobMasterFile_model.dart';
 import '../share_preferences/preferences.dart';
@@ -343,11 +344,24 @@ class DBProvider{
 
       var uri = '${Preferences.servicesURL}/api/Audit/GetTagsToAuditAsync/1/${g_customerId}/${g_storeId}/${g_stockDate}/0/${g_user}/${searchTag}';
       var url = Uri.parse(uri);
+      print ('uri: ${uri}');
       var response = await http.get(url);
       final List parsedList = json.decode(response.body);
       List<TagModel> list = parsedList.map((val) => TagModel.fromJson(val)).toList();
 
       return list;
+  }
+
+  Future<List<AuditDepartmentModel>> getDepartmentsToAudit(String searchDepartment) async {
+    var uri = '${Preferences.servicesURL}/api/Audit/GetDepartmentsToAuditAsync/${g_customerId}/${g_storeId}/${g_stockDate}/0/${g_user}/${searchDepartment}';
+    var url = Uri.parse(uri);
+    print ('uri: ${uri}');
+    var response = await http.get(url);
+    final List parsedList = json.decode(response.body);
+    //print ('response.body: ${response.body}');
+    List<AuditDepartmentModel> list = parsedList.map((val) => AuditDepartmentModel.fromJson(val)).toList();
+
+    return list;
   }
 
   Future<JobGetIndicators> getIndicators() async {

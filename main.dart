@@ -1,4 +1,5 @@
 
+import 'package:tomi_terminal_audit2/providers/department_list_provider.dart';
 import 'package:tomi_terminal_audit2/providers/job_details_list_provider.dart';
 import 'package:tomi_terminal_audit2/providers/job_indicators_provider.dart';
 import 'package:tomi_terminal_audit2/providers/tag_list_provider.dart';
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TagListProvider()),
         ChangeNotifierProvider(create: (_) => JobDetailsListProvider()),
         ChangeNotifierProvider(create: (_) => JobIndicatorsProvider()),
+        ChangeNotifierProvider(create: (_) => DepartmentListProvider()),
       ],
       child: MaterialApp(
           debugShowCheckedModeBanner: false,

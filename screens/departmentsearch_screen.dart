@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:tomi_terminal_audit2/screens/departmentlist_screen.dart';
 
 import '../util/globalvariables.dart';
 import '../widgets/tomiterminal_menu.dart';
@@ -52,6 +53,7 @@ class _DepartmentSearchScreen extends State<DepartmentSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    g_searchDepartment = " ";
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search Department'),
@@ -99,8 +101,8 @@ class _DepartmentSearchScreen extends State<DepartmentSearchScreen> {
                     g_searchDepartment = _scanBarcode;
                   }
 
-                  //final route = MaterialPageRoute(builder: (context) => const TagListScreen());
-                  //Navigator.pushReplacement(context, route);
+                  final route = MaterialPageRoute(builder: (context) => const DepartmentListScreen());
+                  Navigator.pushReplacement(context, route);
                 },
                 label: const Text ('Search')
             ),
