@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tomi_terminal_audit2/providers/db_provider.dart';
 import 'package:tomi_terminal_audit2/providers/department_list_provider.dart';
 import 'package:tomi_terminal_audit2/screens/departmentsearch_screen.dart';
 import 'package:tomi_terminal_audit2/util/globalvariables.dart';
@@ -41,10 +42,15 @@ class _DepartmentListScreenState extends State<DepartmentListScreen> {
                   final department = departmentssections[index];
                   setState(() {
                     g_departmentNumber = department.departmentId!;
-                    g_sectionNumber = department.sectionId! as int;
+                    final sectionId = department.sectionId;
+                    if (sectionId != null) {
+                      g_sectionNumber = sectionId.toInt();
+                    }
+                    print(g_departmentNumber);
+                    print(g_sectionNumber);
                   });
-                  //DBProvider.db.downloadTagsDetailToAudit();
-                  //Navigator.pushReplacementNamed(context, 'TagListDetails');
+                  DBProvider.db.downloadDepartmentSectionSkuToAudit();
+                  Navigator.pushReplacementNamed(context, 'DepartmentSectionListDetails');
                 },
               ),
             ),

@@ -106,6 +106,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       await Future.delayed(const Duration(seconds: 1));
                                       DBProvider.db.deleteAllJobDetailAudit();
                                       DBProvider.db.deleteAllJobAudit();
+                                      DBProvider.db.deleteAllDepartmentSectionSku();
                                       //DBProvider.db.deleteAllMasterFileAudit();
                                       //DBProvider.db.deleteAllDepartmentAudit();
                                       //DBProvider.db.deleteAllAlertAudit();

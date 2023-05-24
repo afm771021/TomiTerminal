@@ -14,6 +14,7 @@ import 'package:http/http.dart' as http;
 
 import '../models/jobAlertParameter_model.dart';
 import '../models/jobAuditDepartment_model.dart';
+import '../models/jobAuditSkuVariationDept_model.dart';
 import '../models/jobDepartment_model.dart';
 import '../models/jobMasterFile_model.dart';
 import '../share_preferences/preferences.dart';
@@ -34,7 +35,7 @@ class DBProvider{
 
   Future<Database> initDB() async{
    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-   final path = join( documentsDirectory.path, 'TomiDB10.db' );
+   final path = join( documentsDirectory.path, 'TomiDB012.db' );
    print ( path );
 
    return await openDatabase(
@@ -79,7 +80,6 @@ class DBProvider{
                       PRIMARY KEY (CUSTOMER_ID, STORE_ID, STOCK_DATE, JOB_DETAILS_ID, TAG_NUMBER)
                   );
       ''');
-
       await db.execute('''
             create table DEPARTMENTS
             (
@@ -88,7 +88,6 @@ class DBProvider{
                 PRIMARY KEY (InventoryKey, depId)
             );
       ''');
-
       await db.execute('''
             create table MASTER_FILE
             (
@@ -100,7 +99,6 @@ class DBProvider{
                 PRIMARY KEY (inventoryKey, code)
             );
       ''');
-
       await db.execute('''
             create table ALERT_PARAMETER
             (
@@ -110,6 +108,35 @@ class DBProvider{
               PARAMETER_ID       TEXT                 NOT NULL,
               VALUE              TEXT                 NOT NULL,
               PRIMARY KEY (CUSTOMER_ID, STORE_ID, STOCK_DATE, PARAMETER_ID  )
+            );
+      ''');
+      await db.execute('''
+            create table SKU_VARIATION_DEPT_AUDIT
+            (
+                CUSTOMER_ID        INTEGER              NOT NULL,
+                STORE_ID           INTEGER              NOT NULL,
+                STOCK_DATE         DATE                 NOT NULL,
+                DEPARTMENT_ID      TEXT                 NOT NULL,
+                SECTION_ID         INTEGER              NOT NULL,
+                VALDEP             INTEGER,
+                DEPARTMENT         TEXT,
+                SKU                TEXT,
+                DESCRIPTION        TEXT,
+                TEORICO            INTEGER,
+                CONTADO            INTEGER,
+                DIF                INTEGER,
+                SALE_PRICE         REAL,
+                CODE               TEXT,
+                TAG                TEXT,
+                PZAS               INTEGER,
+                VALUACION          REAL,
+                REC                INTEGER,
+                AUDIT_USER         TEXT,
+                AUDIT_STATUS       INTEGER DEFAULT 0,
+                AUDIT_NEW_QUANTITY REAL,
+                AUDIT_ACTION       INTEGER,
+                AUDIT_REASON_CODE  INTEGER,
+                PRIMARY KEY (CUSTOMER_ID, STORE_ID, STOCK_DATE, DEPARTMENT_ID, SECTION_ID, REC, CODE)
             );
       ''');
      }
@@ -130,6 +157,27 @@ class DBProvider{
       //print('JOB_AUDIT already exist.');
     }
 
+  }
+
+  Future<int?> updateJobSkuVariationDeptAudit(jobAuditSkuVariationDept jds) async {
+    final db = await database;
+    //print(jda.toJson());
+  //CUSTOMER_ID, STORE_ID, STOCK_DATE, DEPARTMENT_ID, SECTION_ID, REC, CODE
+    final res = await db?.update('SKU_VARIATION_DEPT_AUDIT',
+        jds.toJson(),
+        where : 'CUSTOMER_ID = ? and STORE_ID = ? and STOCK_DATE = ? and DEPARTMENT_ID = ? and SECTION_ID = ? and REC = ? and CODE = ?',
+        whereArgs: [jds.customer_Id, jds.store_Id, jds.stock_Date.toString().substring(0,10), jds.department_Id, jds.section_Id, jds.rec, jds.code]);
+    return res;
+  }
+
+  Future<int?> deleteJobSkuVariationDeptAudit(jobAuditSkuVariationDept jds) async {
+    final db = await database;
+    //print(jda.toJson());
+
+    final res = await db?.delete('SKU_VARIATION_DEPT_AUDIT',
+        where : 'CUSTOMER_ID = ? and STORE_ID = ? and STOCK_DATE = ? and DEPARTMENT_ID = ? and SECTION_ID = ? and REC = ? and CODE = ?',
+        whereArgs: [jds.customer_Id, jds.store_Id, jds.stock_Date.toString().substring(0,10), jds.department_Id, jds.section_Id, jds.rec, jds.code]);
+    return res;
   }
 
   Future<int?> updateJobDetailAudit(jobDetailAudit jda) async {
@@ -180,6 +228,13 @@ class DBProvider{
   Future<int?> deleteAllJobAudit() async {
     final db = await database;
     final res = await db?.delete('JOB_AUDIT');
+    return res;
+  }
+
+  Future<int?> deleteAllDepartmentSectionSku() async {
+    final db = await database;
+    final res = await db?.delete('SKU_VARIATION_DEPT_AUDIT');
+    print('SKU_VARIATION_DEPT_AUDIT: $res');
     return res;
   }
 
@@ -243,6 +298,36 @@ class DBProvider{
             ''');
     return maxRec![0]['count(*)'] as int?;
   }
+
+  Future<int?> nuevoJobAuditSkuVariationDept(jobAuditSkuVariationDept jda) async{
+    var res = 0;
+    int? jobSkuVariationRec  = 0;
+    final db = await database;
+
+    //print('nuevoJobAuditSkuVariationDept: ${jda.code}');
+
+    if (jda.rec == 0){
+      final maxId = await db?.query('SKU_VARIATION_DEPT_AUDIT', columns: ['MAX(rec)'], where: 'customer_Id = ? and store_Id = ? and stock_Date = ? and department_Id = ? and section_Id = ?',
+          whereArgs: [jda.customer_Id, jda.store_Id, jda.stock_Date.toString().substring(0,10), jda.department_Id, jda.section_Id]);
+
+      jobSkuVariationRec = maxId![0]['MAX(rec)'] as int?;
+      jobSkuVariationRec= (jobSkuVariationRec! + 1)!;
+
+      //print ('maxId: ${jobSkuVariationRec}');
+      jda.rec = jobSkuVariationRec.toDouble();
+    }
+
+    try {
+      res = (await db?.insert('SKU_VARIATION_DEPT_AUDIT', jda.toJson()))!;
+    } on DatabaseException
+    catch(e) {
+      //log(e.toString());
+      print('SKU_VARIATION_DEPT_AUDIT already exist.');
+    }
+
+    return res;
+  }
+
 
   Future<int?> nuevoJobDetailAudit(jobDetailAudit jda) async{
     var res = 0;
@@ -344,7 +429,7 @@ class DBProvider{
 
       var uri = '${Preferences.servicesURL}/api/Audit/GetTagsToAuditAsync/1/${g_customerId}/${g_storeId}/${g_stockDate}/0/${g_user}/${searchTag}';
       var url = Uri.parse(uri);
-      print ('uri: ${uri}');
+      //print ('uri: ${uri}');
       var response = await http.get(url);
       final List parsedList = json.decode(response.body);
       List<TagModel> list = parsedList.map((val) => TagModel.fromJson(val)).toList();
@@ -355,7 +440,7 @@ class DBProvider{
   Future<List<AuditDepartmentModel>> getDepartmentsToAudit(String searchDepartment) async {
     var uri = '${Preferences.servicesURL}/api/Audit/GetDepartmentsToAuditAsync/${g_customerId}/${g_storeId}/${g_stockDate}/0/${g_user}/${searchDepartment}';
     var url = Uri.parse(uri);
-    print ('uri: ${uri}');
+    //print ('uri: ${uri}');
     var response = await http.get(url);
     final List parsedList = json.decode(response.body);
     //print ('response.body: ${response.body}');
@@ -382,6 +467,17 @@ class DBProvider{
     return res?.map((s) => jobDetailAudit.fromJson(s)).toList();
   }
 
+  Future<List<jobAuditSkuVariationDept>?> getJobAuditSkuVariationDeptToAudit(int customerId, int storeId, DateTime stockDate, String department_id, int section_id) async{
+    final db = await database;
+    final orderBy = 'ABS(VALUACION) DESC, SKU, TAG, REC';
+    final res = await db?.query('SKU_VARIATION_DEPT_AUDIT', where: 'customer_Id = ? and store_Id = ? and stock_Date = ? and department_id = ? and section_id = ?',
+        whereArgs: [customerId, storeId, stockDate.toString().substring(0,10), department_id, section_id],
+        orderBy: orderBy,
+      );
+    //print(res);
+    return res?.map((s) => jobAuditSkuVariationDept.fromJson(s)).toList();
+  }
+
   Future <List<JobDepartment>?> getAllDepartments() async{
     final db = await database;
     final res = await db?.query('DEPARTMENTS', where: 'InventoryKey = ?',
@@ -395,6 +491,23 @@ DEPARTMENTS
                 InventoryKey         TEXT         NOT NULL,
                 depId
  */
+
+  Future<void> downloadDepartmentSectionSkuToAudit() async {
+    //GetAuditDepartmentSectionSkuListAsync(int sectionId, string departmentId, int customerId,
+    //             int storeId, DateTime stockDate, string user)
+    var uri = '${Preferences.servicesURL}/api/Audit/GetAuditDepartmentSectionSkuList/${g_sectionNumber}/${g_departmentNumber}/${g_customerId}/${g_storeId}/${g_stockDate}/${g_user}';
+    var url = Uri.parse(uri);
+    var response = await http.get(url);
+    print (json.decode(response.body));
+    final List parsedList = json.decode(response.body);
+    List<jobAuditSkuVariationDept> list = parsedList.map((e) => jobAuditSkuVariationDept.fromTOMIDBJson(e)).toList();
+
+    for(var i=0;i<list.length;i++){
+      nuevoJobAuditSkuVariationDept(list[i]);
+      //print('Lista: $list[i]');
+    }
+  }
+
   Future<void> downloadTagsDetailToAudit() async {
     var uri = '${Preferences.servicesURL}/api/Audit/GetAuditTagList/1/${g_tagNumber}/${g_customerId}/${g_storeId}/${g_stockDate}/${g_user}';
     var url = Uri.parse(uri);
