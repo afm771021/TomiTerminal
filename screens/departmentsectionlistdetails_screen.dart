@@ -224,7 +224,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
           });
     }
     else {
-      var tipoerror = 1;// await sendJobDetail(context, jobSkuVariation);
+      var tipoerror = await sendJobDetail(context, jobSkuVariation);
 
       if (tipoerror == 0){
         final route = MaterialPageRoute(
@@ -269,7 +269,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: const [
-                    Text('Tag was restarted by tomi admin.!!'),
+                    Text('Department - Section was restarted by tomi admin.!!'),
                     SizedBox(height: 10),
                   ],
                 ),
@@ -290,7 +290,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
   }
 
   Future<int> sendJobDetail(BuildContext context,
-      List<jobAuditSkuVariationDept> jobDetails) async {
+      List<jobAuditSkuVariationDept> jAuditSkuVariationDetails) async {
 
     if( isLoading ) return -1;
     isLoading = true;
@@ -300,24 +300,26 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
     //Enviar a la base de TOMI los registros con los cambios auditados
     var i = 0;
     var tipoerror = 0;
-    var url = Uri.parse('${Preferences.servicesURL}/api/Audit/GetJobDetailsAuditAsync'); // IOS
+    var url = Uri.parse('${Preferences.servicesURL}/api/Audit/GetSkuVariationDetailsAuditAsync'); // IOS
 
-    for (i = 0; i < jobDetails.length; i++) {
-      jobDetails[i].audit_Status = (jobDetails[i].audit_Action == 1)?jobDetails[i].audit_Status = 4:jobDetails[i].audit_Status = 3;
-      print(jobDetails[i].toJson());
+    for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
+      jAuditSkuVariationDetails[i].audit_Status = (jAuditSkuVariationDetails[i].audit_Action == 1)?jAuditSkuVariationDetails[i].audit_Status = 4:jAuditSkuVariationDetails[i].audit_Status = 3;
+      print(jAuditSkuVariationDetails[i].toJson());
     }
 
     try {
-      List jsonTags = jobDetails.map((jobDetail) => jobDetail.toJson()).toList();
+      List jsonTags = jAuditSkuVariationDetails.map((jAuditSkuVariationDetails) => jAuditSkuVariationDetails.toJson()).toList();
       var params = {
         'customerId':g_customerId,
         'storeId': g_storeId,
         'stockDate' : g_stockDate.toString(),
-        'tagNumber' : g_tagNumber,
-        'jobDetailAuditModel' : jobDetails
+        'departmentId' : g_departmentNumber,
+        'sectionId': g_sectionNumber,
+        'skuVariationAuditModel' : jAuditSkuVariationDetails
       };
+      print(' url: ${url}');
       print(' params:${json.encode(params)}');
-      print(' jobDetailAuditModel:${json.encode(jobDetails)}');
+      print(' jAuditSkuVariationDetails:${json.encode(jAuditSkuVariationDetails)}');
       var response = await http.post(
           url,
           headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
@@ -335,59 +337,11 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
       tipoerror = 1;
     }
     catch(e){
-      print(' JOB_DETAILS_AUDIT already exist in TOMI .${e.toString()}');
+      print(' jAuditSkuVariationDetails already exist in TOMI .${e.toString()}');
       tipoerror = 2;
     }
     isLoading = false;
     setState(() {});
-
-    for (i = 0; i < jobDetails.length; i++) {
-      jobDetails[i].audit_Status = 3;
-
-      if (jobDetails[i].audit_Action == 1) {
-        jobDetails[i].audit_Status = 4;
-      }
-      jobDetails[i].customer_Id;
-      print(url.toString());
-      print(jobDetails[i].toJson());
-      try {
-        var response = await http.post(
-            url,
-            headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
-            body: jsonEncode(jobDetails[i].toJson())
-        );
-
-      } on SocketException catch (e) {
-        //print(' Error en servicio .${e.toString()}');
-        tipoerror = 1;
-      }
-      catch(e){
-        //print(' JOB_DETAILS_AUDIT already exist in TOMI .${e.toString()}');
-        tipoerror = 2;
-      }
-      isLoading = false;
-      setState(() {});
-    } //for
-
-    // actualizar el tag en tomi a estatus AuditToProcess (2)
-     url = Uri.parse(
-        '${Preferences.servicesURL}/api/Audit/UpdateAuditTagAsync/${g_customerId}/${g_storeId}/${g_stockDate
-            .toString().substring(0, 10)}/${g_tagNumber}/1');
-    //print(url.toString());
-    try{
-      var response = await http.get(url);
-      if (response.statusCode == 200) {
-        Map<String, dynamic> data = jsonDecode(response.body);
-        if (!data["success"]){
-          return 2;
-        }
-      }
-      //String error = data["error"];
-    }
-    on SocketException catch(e){
-      //print (e.toString());
-      tipoerror = 1;
-    }
 
     return tipoerror;
   }
