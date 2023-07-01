@@ -13,17 +13,6 @@ class TomiTerminalMenu extends StatelessWidget {
         padding: EdgeInsets.zero,
         children:  [
           const _DrawerHeader(),
-          /*Visibility(
-              visible: (g_login)?true:false,
-              child: ListTile(
-                leading:  const Icon( Icons.sticky_note_2, color: Colors.indigo,),
-                title:  const Text('All Tags'),
-                onTap: (){
-                  final route = MaterialPageRoute(builder: (context) => const TagListScreen());
-                  Navigator.pushReplacement(context, route);
-                },
-              ),
-          ),*/
           Visibility(
             visible: (g_login)?true:false,
             child: ListTile(

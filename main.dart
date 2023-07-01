@@ -1,4 +1,5 @@
 
+import 'package:flutter/services.dart';
 import 'package:tomi_terminal_audit2/providers/department_list_provider.dart';
 import 'package:tomi_terminal_audit2/providers/departmentsection_details_list_provider.dart';
 import 'package:tomi_terminal_audit2/providers/job_details_list_provider.dart';
@@ -13,6 +14,7 @@ import 'screens/screens.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Preferences.init();
   runApp(const MyApp());
 }

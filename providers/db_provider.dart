@@ -35,7 +35,7 @@ class DBProvider{
 
   Future<Database> initDB() async{
    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-   final path = join( documentsDirectory.path, 'TomiDB012.db' );
+   final path = join( documentsDirectory.path, 'TomiDB013.db' );
    print ( path );
 
    return await openDatabase(
@@ -136,6 +136,7 @@ class DBProvider{
                 AUDIT_NEW_QUANTITY REAL,
                 AUDIT_ACTION       INTEGER,
                 AUDIT_REASON_CODE  INTEGER,
+                SENT               INTEGER DEFAULT 0,
                 PRIMARY KEY (CUSTOMER_ID, STORE_ID, STOCK_DATE, DEPARTMENT_ID, SECTION_ID, REC, CODE)
             );
       ''');
@@ -161,7 +162,7 @@ class DBProvider{
 
   Future<int?> updateJobSkuVariationDeptAudit(jobAuditSkuVariationDept jds) async {
     final db = await database;
-    //print(jda.toJson());
+    //print('updateJobSkuVariationDeptAudit: ${jds.toJson()}');
   //CUSTOMER_ID, STORE_ID, STOCK_DATE, DEPARTMENT_ID, SECTION_ID, REC, CODE
     final res = await db?.update('SKU_VARIATION_DEPT_AUDIT',
         jds.toJson(),
@@ -306,16 +307,16 @@ class DBProvider{
 
     //print('nuevoJobAuditSkuVariationDept: ${jda.code}');
 
-    if (jda.rec == 0){
+    /*if (jda.rec == 0){
       final maxId = await db?.query('SKU_VARIATION_DEPT_AUDIT', columns: ['MAX(rec)'], where: 'customer_Id = ? and store_Id = ? and stock_Date = ? and department_Id = ? and section_Id = ?',
           whereArgs: [jda.customer_Id, jda.store_Id, jda.stock_Date.toString().substring(0,10), jda.department_Id, jda.section_Id]);
 
       jobSkuVariationRec = maxId![0]['MAX(rec)'] as int?;
       jobSkuVariationRec= (jobSkuVariationRec! + 1)!;
 
-      //print ('maxId: ${jobSkuVariationRec}');
+      print ('maxId: ${jobSkuVariationRec}');
       jda.rec = jobSkuVariationRec.toDouble();
-    }
+    }*/
 
     try {
       res = (await db?.insert('SKU_VARIATION_DEPT_AUDIT', jda.toJson()))!;
@@ -474,7 +475,7 @@ class DBProvider{
         whereArgs: [customerId, storeId, stockDate.toString().substring(0,10), department_id, section_id],
         orderBy: orderBy,
       );
-    //print(res);
+    //print('getJobAuditSkuVariationDeptToAudit:${res}');
     return res?.map((s) => jobAuditSkuVariationDept.fromJson(s)).toList();
   }
 
@@ -504,6 +505,7 @@ DEPARTMENTS
 
     for(var i=0;i<list.length;i++){
       nuevoJobAuditSkuVariationDept(list[i]);
+      //print('Lista: ${i}');
       //print('Lista: $list[i]');
     }
   }
@@ -645,7 +647,7 @@ DEPARTMENTS
     var uri = '${Preferences.servicesURL}/api/ProgramTerminal/GetAlerts/${g_inventorykey}';
     var url = Uri.parse(uri);
     var response = await http.get(url);
-    print(json.decode(response.body));
+    print('Get Alerts: ${json.decode(response.body)}');
     final List parsedList = json.decode(response.body);
     List<JobAlertParameter> list = parsedList.map((e) => JobAlertParameter.fromJson(e)).toList();
 

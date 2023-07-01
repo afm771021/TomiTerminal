@@ -1,9 +1,11 @@
 import 'package:flutter/services.dart';
-import 'package:tomi_terminal_audit2/models/jobDetailAudit_model.dart';
+import 'package:intl/intl.dart';
 import 'package:tomi_terminal_audit2/util/globalvariables.dart';
 import 'package:flutter/material.dart';
 import '../models/jobAuditSkuVariationDept_model.dart';
 import '../providers/db_provider.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class DepartmentSectionNewScreen extends StatefulWidget {
   DepartmentSectionNewScreen({Key? key,}) : super(key: key);
@@ -17,6 +19,33 @@ class _DepartmentSectionNewScreenState extends State<DepartmentSectionNewScreen>
   late bool existDepartment = false;
   /*late JobDepartment dropdownValue;
    List<JobDepartment> departmentsItemList = [];*/
+
+  /*void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }*/
+
+ /* @override
+  dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    super.dispose();
+  }*/
+
+  Future<void> writeToLog(String log) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/log${ DateFormat('yyyy-MM-dd').format(DateTime.now()).toString()}.txt');
+
+    final timestamp = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+    final logWithTimestamp = '[$timestamp] $log\n';
+    print('${directory.path}/log.txt');
+    await file.writeAsString(logWithTimestamp, mode: FileMode.append);
+  }
 
   var jAuditSkuVariationDept = jobAuditSkuVariationDept(
       customer_Id: g_customerId.toDouble(),
@@ -37,11 +66,12 @@ class _DepartmentSectionNewScreenState extends State<DepartmentSectionNewScreen>
       pzas: 0,
       valuacion: 0,
       rec: 0,
-      audit_User: '',
+      audit_User: g_user,
       audit_Status: 2,
       audit_New_Quantity: 0,
       audit_Action: 3,
-      audit_Reason_Code: 0);
+      audit_Reason_Code: 0,
+      sent: 0);
 
   @override
   Widget build(BuildContext context) {
@@ -71,28 +101,6 @@ class _DepartmentSectionNewScreenState extends State<DepartmentSectionNewScreen>
                     jAuditSkuVariationDept.tag = value!;
                   },
                 ),
-                /*FutureBuilder<List<JobDepartment>> (
-                    future:  loadDepartments(),
-                    builder: (context, snapshot) {
-                        return DropdownButtonFormField<JobDepartment>(
-                            decoration: const InputDecoration(
-                              icon: Icon(Icons.maps_home_work),
-                              //hintText: 'What do people call you?',
-                              labelText: 'Department',
-                            ),
-                            //value: dropdownValue,
-                            items: departmentsItemList.map((department) => DropdownMenuItem<JobDepartment>(
-                                child: Text (department.depId!),
-                                value: department,
-                              )
-                            ).toList(),
-                            onChanged: (JobDepartment? value){
-                              print ('onChanged:$value');
-                              setState(() {
-                                dropdownValue = value!;
-                              });
-                            });
-                    }*/
               ),
             ),
 
@@ -124,8 +132,10 @@ class _DepartmentSectionNewScreenState extends State<DepartmentSectionNewScreen>
         child: const Icon(Icons.save, size: 40,),
         onPressed: () async {
           if ((jAuditSkuVariationDept.code == null || jAuditSkuVariationDept.code.isEmpty ||
-              jAuditSkuVariationDept.sku == null || jAuditSkuVariationDept.sku.isEmpty ||
-              jAuditSkuVariationDept.contado == null || jAuditSkuVariationDept.contado <= 0 ||
+              //jAuditSkuVariationDept.sku == null || jAuditSkuVariationDept.sku.isEmpty ||
+              jAuditSkuVariationDept.tag == null || jAuditSkuVariationDept.tag.isEmpty ||
+              jAuditSkuVariationDept.pzas== null || jAuditSkuVariationDept.pzas <= 0 ||
+              jAuditSkuVariationDept.sale_Price == null || jAuditSkuVariationDept.sale_Price < 0 ||
               jAuditSkuVariationDept.audit_Reason_Code == null || jAuditSkuVariationDept.audit_Reason_Code <=0)
              ){
             /*print ('department_Id: ${jdetailaudit.department_Id}');
@@ -157,6 +167,7 @@ class _DepartmentSectionNewScreenState extends State<DepartmentSectionNewScreen>
                 });
           }
           else {
+            writeToLog('Add Record Code: ${jAuditSkuVariationDept.code} Add Record pzas: ${jAuditSkuVariationDept.pzas}');
             DBProvider.db.nuevoJobAuditSkuVariationDept(jAuditSkuVariationDept);
             Navigator.pushReplacementNamed(context, 'DepartmentSectionListDetails');
             //print(jAuditSkuVariationDept);
@@ -185,7 +196,7 @@ class AddForm extends StatelessWidget {
           child: Form(
             child: Column(
               children: [
-                const SizedBox(height: 10,),
+                /*const SizedBox(height: 10,),
                 TextFormField(
                   decoration: const InputDecoration(
                     icon: Icon(Icons.qr_code),
@@ -194,7 +205,7 @@ class AddForm extends StatelessWidget {
                   onChanged: (String? value){
                     jAuditSkuVariationDept.sku = value!;
                   },
-                ),
+                ),*/
                 const SizedBox(height: 10,),
                 TextFormField(
                   decoration: const InputDecoration(
@@ -215,8 +226,8 @@ class AddForm extends StatelessWidget {
                   ),
                   onChanged: (String? value){
                     try{
-                      jAuditSkuVariationDept.contado = int.parse(value!) * 1.0;}
-                    catch (e){ jAuditSkuVariationDept.contado = 0; }
+                      jAuditSkuVariationDept.pzas = int.parse(value!) * 1.0;}
+                    catch (e){ jAuditSkuVariationDept.pzas = 0; }
                   },
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),

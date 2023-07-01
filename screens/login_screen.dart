@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:tomi_terminal_audit2/models/jobAudit_model.dart';
 import 'package:tomi_terminal_audit2/share_preferences/preferences.dart';
 import 'package:tomi_terminal_audit2/util/globalvariables.dart';
@@ -7,6 +9,8 @@ import 'package:http/http.dart' as http;
 import '../providers/db_provider.dart';
 import '../widgets/tomiterminal_menu.dart';
 import 'screens.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class LoginScreen extends StatefulWidget
 {
@@ -23,6 +27,25 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController passwordController = TextEditingController();
   static const String  _title = '';
   bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
+
+  Future<void> writeToLog(String log) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/log${ DateFormat('yyyy-MM-dd').format(DateTime.now()).toString()}.txt');
+
+    final timestamp = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+    final logWithTimestamp = '[$timestamp] $log\n';
+    await file.writeAsString(logWithTimestamp, mode: FileMode.append);
+  }
+
 
   /*@override
   void initState() {
@@ -95,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           )
                       ),
                       const SizedBox(height: 50,),
-                      const Center(child: Text ('(Ver. 1.0.3)', style: TextStyle(fontSize: 10),)),
+                      const Center(child: Text ('(Ver. 1.0.4)', style: TextStyle(fontSize: 10),)),
                     ],
                   ),
                    if ( isLoading )
@@ -172,7 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (respuesta.statusCode == 200) {
         var loginResponseBody = (jsonDecode(respuesta.body));
-        print(respuesta.body);
+       // print('statusCode: ${respuesta.body}');
         if (!loginResponseBody['success']) {
           showDialog(
               barrierDismissible: true,
@@ -208,15 +231,17 @@ class _LoginScreenState extends State<LoginScreen> {
             g_customerId = loginResponseBody['customerId'].round();
             g_storeId = loginResponseBody['storeId'].round();
             g_auditType = loginResponseBody['auditType'].round();
-            print('g_auditType: ${g_auditType}');
+            //print('g_auditType: ${g_auditType}');
             g_stockDate = DateTime.parse(loginResponseBody['stockDate']);
           });
+
+          writeToLog('Login a registrar: ${g_user} - TipoAuditoria: ${g_auditType} - JOB: ${g_customerId}, ${g_storeId}, ${g_stockDate}');
 
           int totalDepartments = await DBProvider.db.downloadDepartments();
           int totalalerts = await DBProvider.db.downloadAlerts();
 
-          print('totalDepartments: ${totalDepartments}');
-          print('totalalerts: ${totalalerts}');
+          //print('totalDepartments: ${totalDepartments}');
+          //print('totalalerts: ${totalalerts}');
 
           if (g_auditType == 1) {
             if (totalDepartments > 0 && totalalerts > 0) {

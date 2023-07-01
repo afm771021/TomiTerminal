@@ -1,14 +1,54 @@
 
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/jobAuditSkuVariationDept_model.dart';
-import '../models/jobDetailAudit_model.dart';
 import '../providers/db_provider.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
-class DepartmentSectionDeleteScreen extends StatelessWidget {
+import '../share_preferences/preferences.dart';
+import '../util/globalvariables.dart';
+
+class DepartmentSectionDeleteScreen extends StatefulWidget {
   const DepartmentSectionDeleteScreen({Key? key, required this.jAuditSkuVariationDept}) : super(key: key);
 
   final jobAuditSkuVariationDept jAuditSkuVariationDept;
+
+  @override
+  State<DepartmentSectionDeleteScreen> createState() => _DepartmentSectionDeleteScreenState();
+}
+
+class _DepartmentSectionDeleteScreenState extends State<DepartmentSectionDeleteScreen> {
+
+  /*void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
+
+  @override
+  dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    super.dispose();
+  }*/
+
+  Future<void> writeToLog(String log) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/log${ DateFormat('yyyy-MM-dd').format(DateTime.now()).toString()}.txt');
+
+    final timestamp = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+    final logWithTimestamp = '[$timestamp] $log\n';
+    print('${directory.path}/log.txt');
+    await file.writeAsString(logWithTimestamp, mode: FileMode.append);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +64,7 @@ class DepartmentSectionDeleteScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            DeleteForm(jAuditSkuVariationDept: jAuditSkuVariationDept),
+            DeleteForm(jAuditSkuVariationDept: widget.jAuditSkuVariationDept),
             const SizedBox(height: 100),
           ],
         ),
@@ -32,7 +72,7 @@ class DepartmentSectionDeleteScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.delete, size: 40,),
         onPressed: (){
-          if (jAuditSkuVariationDept.audit_Reason_Code == null || jAuditSkuVariationDept.audit_Reason_Code <=0){
+          if (widget.jAuditSkuVariationDept.audit_Reason_Code == null || widget.jAuditSkuVariationDept.audit_Reason_Code <=0){
             showDialog(
                 barrierDismissible: true,
                 context: context,
@@ -76,11 +116,18 @@ class DepartmentSectionDeleteScreen extends StatelessWidget {
                     ),
                     actions: [
                       TextButton(
-                          onPressed: (){
-                            jAuditSkuVariationDept.audit_New_Quantity = 0.0;
-                            jAuditSkuVariationDept.audit_Action = 4;
-                            jAuditSkuVariationDept.audit_Status = 2;
-                            DBProvider.db.updateJobSkuVariationDeptAudit(jAuditSkuVariationDept);
+                          onPressed: () async {
+                            widget.jAuditSkuVariationDept.audit_New_Quantity = 0.0;
+                            widget.jAuditSkuVariationDept.audit_Action = 4;
+                            widget.jAuditSkuVariationDept.audit_Status = 2;
+
+                            var tipoerror = await sendDeleteJobDetail(widget.jAuditSkuVariationDept);
+
+                            if (tipoerror == 0){
+                              widget.jAuditSkuVariationDept.sent = 1;
+                            }
+                            writeToLog('Delete Record: ${widget.jAuditSkuVariationDept.code}');
+                            DBProvider.db.updateJobSkuVariationDeptAudit(widget.jAuditSkuVariationDept);
                             Navigator.pushReplacementNamed(context, 'DepartmentSectionListDetails');
                           },
                           child: const Text('OK')),
@@ -95,6 +142,65 @@ class DepartmentSectionDeleteScreen extends StatelessWidget {
       ),
     );
   }
+
+  Future<int> sendDeleteJobDetail(jobAuditSkuVariationDept jAuditSkuVariationDetailsRecord) async {
+
+    //Enviar a la base de TOMI los registros con los cambios auditados
+
+    List<jobAuditSkuVariationDept> jAuditSkuVariationDetails = [];
+    var i = 0;
+    var tipoerror = 0;
+    var url = Uri.parse('${Preferences.servicesURL}/api/Audit/GetSkuVariationDetailsAuditAsync'); // IOS
+
+    jAuditSkuVariationDetails.add(jAuditSkuVariationDetailsRecord);
+    writeToLog('Count Records to send: ${jAuditSkuVariationDetails.length}');
+
+    for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
+      jAuditSkuVariationDetails[i].audit_Status = (jAuditSkuVariationDetails[i].audit_Action == 1)?jAuditSkuVariationDetails[i].audit_Status = 4:jAuditSkuVariationDetails[i].audit_Status = 3;
+      print(jAuditSkuVariationDetails[i].toJson());
+      //writeToLog('record: i - Json: ${jAuditSkuVariationDetails[i].toJson().toString()}');
+    }
+
+    try {
+      List jsonTags = jAuditSkuVariationDetails.map((jAuditSkuVariationDetails) => jAuditSkuVariationDetails.toJson()).toList();
+      var params = {
+        'customerId':g_customerId,
+        'storeId': g_storeId,
+        'stockDate' : g_stockDate.toString(),
+        'departmentId' : g_departmentNumber,
+        'sectionId': g_sectionNumber,
+        'closeSection' : 0,
+        'skuVariationAuditModel' : jAuditSkuVariationDetails
+      };
+      print(' url: ${url}');
+      print(' params:${json.encode(params)}');
+      print(' jAuditSkuVariationDetails:${json.encode(jAuditSkuVariationDetails)}');
+      var response = await http.post(
+          url,
+          headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
+          body: json.encode(params)
+      );
+      if (response.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(response.body);
+        print(' data .${data}');
+        if (!data["success"]){
+          tipoerror = 2;
+        }
+      }
+    } on SocketException catch (e) {
+      //print(' Error en servicio .${e.toString()}');
+      tipoerror = 1;
+    }
+    catch(e){
+      //print(' jAuditSkuVariationDetails already exist in TOMI .${e.toString()}');
+      writeToLog('SendJobDetail: ${e.toString()}');
+      tipoerror = 2;
+    }
+
+    return tipoerror;
+  }
+
+
 }
 
 class DeleteForm extends StatelessWidget {
@@ -117,7 +223,7 @@ class DeleteForm extends StatelessWidget {
               children: [
                 _ProductDetails(numrec:jAuditSkuVariationDept.rec.round(),
                     sku: jAuditSkuVariationDept.code,
-                    qty: jAuditSkuVariationDept.contado.round()),
+                    qty: jAuditSkuVariationDept.pzas.round()),
                 SizedBox(height: 10,),
                 /*Text('# REC : ${jdetailaudit.job_Details_Id.round()}'),
                 SizedBox(height: 10,),

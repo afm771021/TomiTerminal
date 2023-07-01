@@ -20,7 +20,12 @@ class _DepartmentSearchScreen extends State<DepartmentSearchScreen> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
+
 
   @override
   void dispose() {

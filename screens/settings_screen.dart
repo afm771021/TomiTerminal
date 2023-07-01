@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tomi_terminal_audit2/share_preferences/preferences.dart';
 import 'package:tomi_terminal_audit2/widgets/tomiterminal_menu.dart';
 import '../providers/db_provider.dart';
@@ -20,18 +21,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late int maxDER = 0;
   late int maxALR = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    countMasterFileRecords();
+  }
+
   Future <int?> countMasterFileRecords () async{
     maxMFR = (await DBProvider.db.countMastedFileRecordsRaw())!;
     maxDER = (await DBProvider.db.countDepartmentsRecordsRaw())!;
     maxALR = (await DBProvider.db.countAlertRecordsRaw())!;
     setState(() {});
-  }
-
-  @override
-   void initState() {
-    // TODO: implement initState
-    super.initState();
-       countMasterFileRecords();
   }
 
 

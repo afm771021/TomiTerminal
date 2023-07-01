@@ -34,6 +34,7 @@ class jobAuditSkuVariationDept {
     required this.audit_New_Quantity,
     required this.audit_Action,
     required this.audit_Reason_Code,
+    required this.sent
   });
 
   double customer_Id;
@@ -59,6 +60,7 @@ class jobAuditSkuVariationDept {
   double audit_New_Quantity;
   double audit_Action;
   double audit_Reason_Code;
+  double sent;
 
 
   factory jobAuditSkuVariationDept.fromJson(Map<String, dynamic> json) => jobAuditSkuVariationDept(
@@ -85,6 +87,7 @@ class jobAuditSkuVariationDept {
     audit_New_Quantity: json["AUDIT_NEW_QUANTITY"].toDouble(),
     audit_Action: json["AUDIT_ACTION"].toDouble(),
     audit_Reason_Code: json["AUDIT_REASON_CODE"].toDouble(),
+    sent: json["SENT"].toDouble()
   );
 
   factory jobAuditSkuVariationDept.fromTOMIDBJson(Map<String, dynamic> json) => jobAuditSkuVariationDept(
@@ -111,6 +114,7 @@ class jobAuditSkuVariationDept {
     audit_New_Quantity: json["auditNewQuantity"] ?? 0,
     audit_Action: json["auditAction"] ?? 0,
     audit_Reason_Code: json["auditReasonCode"] ?? 0,
+    sent: json["sent"] ?? 0
   );
 
   Map<String, dynamic> toJson() => {
@@ -137,5 +141,6 @@ class jobAuditSkuVariationDept {
     "audit_New_Quantity": audit_New_Quantity,
     "audit_Action": audit_Action,
     "audit_Reason_Code": audit_Reason_Code,
+    "sent": sent
   };
 }
