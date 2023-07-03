@@ -75,9 +75,78 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
           IconButton(
             iconSize: 40,
             onPressed: !isLoading ? () async {
-              validaDepartments(context, departmentSectionList);
+              validaDepartments(departmentSectionList);
             }:null,
-            icon: const Icon(Icons.send),
+            icon: const Icon(Icons.cloud_done),
+          ),
+          IconButton(
+            iconSize: 40,
+            onPressed: !isLoading ? () async {
+              showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      elevation: 5,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadiusDirectional.circular(10)),
+                      title: const Text('Alert'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Text('Are you sure you want to send th whole section ?'),
+                          SizedBox(height: 10),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              var pendings = countDepartmentspending(departmentSectionList);
+                              print(pendings);
+                              showDialog(
+                                  barrierDismissible: false,
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      elevation: 5,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadiusDirectional.circular(10)),
+                                      title: const Text('Alert'),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children:  [
+                                          Text('$pendings record(s) missing to process, continue ?'),
+                                          SizedBox(height: 10),
+                                        ],
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () async {
+                                              Navigator.pop(context);
+                                              validaDepartments(departmentSectionList);
+                                            },
+                                            child: const Text('OK')),
+                                        TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                              },
+
+                                    child: const
+                                     Text('Cancel'))
+                                      ],
+                                    );
+                                  });
+                            },
+                            child: const Text('OK')),
+                        TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'))
+                      ],
+                    );
+                  });
+            }:null,
+            icon: const Icon(Icons.bathtub_outlined),
           )
         ],
       ),
@@ -148,11 +217,12 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                                 onLongPress: (){
                                   writeToLog('Undo action Record Code: ${departmentSectionList[index].code} last action: ${departmentSectionList[index].audit_Action} last new quantity: ${departmentSectionList[index].audit_New_Quantity} last reason code: ${departmentSectionList[index].audit_Reason_Code}');
 
-                                  if (departmentSectionList[index].audit_Action != 3){// && departmentSectionList[index].audit_Action != 4 && departmentSectionList[index].audit_Action != 5) {
+                                  if (departmentSectionList[index].audit_Action != 3 && departmentSectionList[index].audit_Action != 4 && departmentSectionList[index].audit_Action != 5) {
                                     departmentSectionList[index].audit_New_Quantity = 0.0;
                                     departmentSectionList[index].audit_Action = 0;
                                     departmentSectionList[index].audit_Status = 2;
                                     departmentSectionList[index].audit_Reason_Code = 0;
+                                    departmentSectionList[index].sent = 0;
                                     DBProvider.db.updateJobSkuVariationDeptAudit(departmentSectionList[index]);
                                   }
                                   else if (departmentSectionList[index].audit_Action == 3){
@@ -316,7 +386,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                                       ),
 
                                       Column(
-                                        children: [Text('${departmentSectionList[index].audit_New_Quantity.round()}',
+                                        children: [Text('${departmentSectionList[index].audit_New_Quantity.round()} REC: ${departmentSectionList[index].rec}',
                                           style: TextStyle(fontSize: 10, color: Colors.black, fontWeight: FontWeight.bold,),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,),]
@@ -499,8 +569,21 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
     return tipoerror;
   }
 
+  int countDepartmentspending(
+      List<jobAuditSkuVariationDept> jobSkuVariation)  {
+      var i = 0;
+      var noprocesados = 0;
 
-  Future<void> validaDepartments(BuildContext context,
+      for (i = 0; i < jobSkuVariation.length; i++) {
+        if (jobSkuVariation[i].audit_Action == 0) {
+          noprocesados += 1;
+        }
+      }
+
+    return noprocesados;
+  }
+
+  Future<void> validaDepartments(
       List<jobAuditSkuVariationDept> jobSkuVariation) async {
     var i = 0;
     var noprocesados = 0;
@@ -633,7 +716,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
           jAuditSkuVariationDetailsTmp.add(jAuditSkuVariationDetails[i]);
         }
     }
-    //print('Count Records not sended: ${jAuditSkuVariationDetailsTmp.length}');
+    print('Count Records not sended: ${jAuditSkuVariationDetailsTmp.length}');
     try {
       List jsonTags = jAuditSkuVariationDetails.map((jAuditSkuVariationDetails) => jAuditSkuVariationDetails.toJson()).toList();
       var params = {
@@ -643,7 +726,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
         'departmentId' : g_departmentNumber,
         'sectionId': g_sectionNumber,
         'closeSection' : 1,
-        'skuVariationAuditModel' : jAuditSkuVariationDetails
+        'skuVariationAuditModel' : jAuditSkuVariationDetailsTmp
       };
       // print(' url: ${url}');
       // print(' params:${json.encode(params)}');
