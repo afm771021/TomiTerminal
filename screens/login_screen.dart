@@ -231,17 +231,20 @@ class _LoginScreenState extends State<LoginScreen> {
             g_customerId = loginResponseBody['customerId'].round();
             g_storeId = loginResponseBody['storeId'].round();
             g_auditType = loginResponseBody['auditType'].round();
-            //print('g_auditType: ${g_auditType}');
             g_stockDate = DateTime.parse(loginResponseBody['stockDate']);
+            g_user_rol = loginResponseBody['rol'];
+            print('g_user_rol: ${g_user_rol}');
           });
 
           writeToLog('Login a registrar: ${g_user} - TipoAuditoria: ${g_auditType} - JOB: ${g_customerId}, ${g_storeId}, ${g_stockDate}');
 
           int totalDepartments = await DBProvider.db.downloadDepartments();
           int totalalerts = await DBProvider.db.downloadAlerts();
+          int? inventoryManager = await DBProvider.db.downloadInventoryManager();
 
           //print('totalDepartments: ${totalDepartments}');
           //print('totalalerts: ${totalalerts}');
+          print('inventoryManager: ${inventoryManager}');
 
           if (g_auditType == 1) {
             if (totalDepartments > 0 && totalalerts > 0) {
@@ -278,7 +281,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: const [
                           Text(
-                              'Can not load catalogs (Departments, Alerts) !!'),
+                              'Can not load catalogs (Departments, Alerts, Inventory Manager) !!'),
                           SizedBox(height: 10),
                         ],
                       ),
@@ -343,8 +346,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   });
             }
           }
-
-
         }
       }
     }

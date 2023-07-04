@@ -587,7 +587,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
       List<jobAuditSkuVariationDept> jobSkuVariation) async {
     var i = 0;
     var noprocesados = 0;
-
+    //print('validaDepartments g_auditType: ${g_auditType}');
     if (g_auditType == 1) {
       for (i = 0; i < jobSkuVariation.length; i++) {
         if (jobSkuVariation[i].audit_Action == 0) {
@@ -595,7 +595,19 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
         }
       }
     }
-      print('valida departamento');
+    else{ // si es auditoria para SORIANA
+      for (i = 0; i < jobSkuVariation.length; i++) {
+        if (jobSkuVariation[i].audit_Action == 0.0) {
+          jobSkuVariation[i].audit_Action = 6;
+        }
+      }
+    }
+
+    for (i = 0; i < jobSkuVariation.length; i++) {
+       print(jobSkuVariation[i].audit_Action);
+    }
+
+     // print('valida departamento');
     if (noprocesados > 0) {
       showDialog(
           barrierDismissible: true,

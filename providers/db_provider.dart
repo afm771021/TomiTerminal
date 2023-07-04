@@ -11,7 +11,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
 import '../models/jobAlertParameter_model.dart';
 import '../models/jobAuditDepartment_model.dart';
 import '../models/jobAuditSkuVariationDept_model.dart';
@@ -35,7 +34,7 @@ class DBProvider{
 
   Future<Database> initDB() async{
    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-   final path = join( documentsDirectory.path, 'TomiDB013.db' );
+   final path = join( documentsDirectory.path, 'TomiDB0131.db' );
    print ( path );
 
    return await openDatabase(
@@ -50,6 +49,16 @@ class DBProvider{
                        INVENTORYKEY        TEXT,
                        CREATED_AT          DATE,
                        PRIMARY KEY (USERNAME, INVENTORYKEY)
+                  );
+      ''');
+      await db.execute('''
+                  create table IM_AUDIT
+                  (
+                       USERID              INTEGER,
+                       PASSWORD            TEXT,
+                       INVENTORYKEY        TEXT,
+                       CREATED_AT          DATE,
+                       PRIMARY KEY (USERID)
                   );
       ''');
       await db.execute('''
@@ -639,6 +648,48 @@ DEPARTMENTS
     return i;
   }
 
+  Future<int?> downloadInventoryManager() async{
+    final db = await database;
+    int? i = 0;
+    var uri = '${Preferences.servicesURL}/api/User/GetInventoryManager/${g_inventorykey}';
+    var url = Uri.parse(uri);
+    var response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      var loginResponseBody = (jsonDecode(response.body));
+       // print('downloadInventoryManager: ${response.body}');
+      if (loginResponseBody['success']) {
+        i = await nuevoInventoryManager(double.parse(loginResponseBody['userId'].toString()).round(), loginResponseBody['password']);
+
+      }
+    }
+    return i;
+  }
+
+  Future<int?> nuevoInventoryManager(int userid, String password) async{
+    int? res = 0;
+    final db = await database;
+    print('nuevoInventoryManager: ${userid} ${password}');
+    try {
+      res = await db?.rawInsert('''
+        Insert into IM_AUDIT (
+                              USERID,
+                              PASSWORD,
+                              INVENTORYKEY,
+                              CREATED_AT)
+                     values(  '$userid',
+                              '$password',
+                              '$g_inventorykey',
+                              DATE())
+                              ''');
+      res = 1;
+    } on DatabaseException
+    catch(e) {
+      res = -1;
+    }
+    return res;
+  }
+
     Future<int> downloadAlerts() async{
     final db = await database;
     await db?.delete('ALERT_PARAMETER');
@@ -656,6 +707,17 @@ DEPARTMENTS
     }
     return i;
   }
+
+  /*
+  create table IM_AUDIT
+                  (
+                       USERID              INTEGER,
+                       PASSWORD            TEXT,
+                       INVENTORYKEY        TEXT,
+                       CREATED_AT          DATE,
+                       PRIMARY KEY (USERID)
+                  );
+   */
 
   Future<int?> nuevoAlert(JobAlertParameter jda) async{
     int? res = 0;

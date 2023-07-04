@@ -15,4 +15,5 @@ int g_countMasterfile = 0;
 int g_auditType = 0;
 String g_departmentNumber = "";
 int g_sectionNumber = 0;
+String g_user_rol = "";
 
