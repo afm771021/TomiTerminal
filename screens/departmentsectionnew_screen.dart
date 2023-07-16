@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:tomi_terminal_audit2/util/globalvariables.dart';
@@ -6,6 +8,8 @@ import '../models/jobAuditSkuVariationDept_model.dart';
 import '../providers/db_provider.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+
+import '../share_preferences/preferences.dart';
 
 class DepartmentSectionNewScreen extends StatefulWidget {
   DepartmentSectionNewScreen({Key? key,}) : super(key: key);
@@ -168,6 +172,9 @@ class _DepartmentSectionNewScreenState extends State<DepartmentSectionNewScreen>
           }
           else {
             writeToLog('Add Record Code: ${jAuditSkuVariationDept.code} Add Record pzas: ${jAuditSkuVariationDept.pzas}');
+
+            //var tipoerror = await sendAddJobDetail(jAuditSkuVariationDept);
+
             DBProvider.db.nuevoJobAuditSkuVariationDept(jAuditSkuVariationDept);
             Navigator.pushReplacementNamed(context, 'DepartmentSectionListDetails');
             //print(jAuditSkuVariationDept);
@@ -175,6 +182,73 @@ class _DepartmentSectionNewScreenState extends State<DepartmentSectionNewScreen>
         },
       ),
     );
+  }
+
+  Future<int> sendAddJobDetail(jobAuditSkuVariationDept jAuditSkuVariationDetailsRecord) async {
+
+    //Enviar a la base de TOMI los registros con los cambios auditados
+
+    List<jobAuditSkuVariationDept> jAuditSkuVariationDetails = [];
+    var i = 0;
+    var tipoerror = 0;
+    var url = Uri.parse('${Preferences.servicesURL}/api/Audit/GetSkuVariationDetailsAuditAsync'); // IOS
+
+    final auditorSkuVariationDept = await DBProvider.db.getAuditorSkuVariationDeptAuditedandPendingtosend();
+    jAuditSkuVariationDetails = [...?auditorSkuVariationDept];
+
+    jAuditSkuVariationDetails.add(jAuditSkuVariationDetailsRecord);
+    writeToLog('Count Records to send: ${jAuditSkuVariationDetails.length}');
+
+    for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
+      jAuditSkuVariationDetails[i].audit_Status = (jAuditSkuVariationDetails[i].audit_Action == 1)?jAuditSkuVariationDetails[i].audit_Status = 4:jAuditSkuVariationDetails[i].audit_Status = 3;
+      print(jAuditSkuVariationDetails[i].toJson());
+      //writeToLog('record: i - Json: ${jAuditSkuVariationDetails[i].toJson().toString()}');
+    }
+
+    try {
+      List jsonTags = jAuditSkuVariationDetails.map((jAuditSkuVariationDetails) => jAuditSkuVariationDetails.toJson()).toList();
+      var params = {
+        'customerId':g_customerId,
+        'storeId': g_storeId,
+        'stockDate' : g_stockDate.toString(),
+        'departmentId' : g_departmentNumber,
+        'sectionId': g_sectionNumber,
+        'closeSection' : 0,
+        'skuVariationAuditModel' : jAuditSkuVariationDetails
+      };
+      print(' url: ${url}');
+      print(' params:${json.encode(params)}');
+      print(' jAuditSkuVariationDetails:${json.encode(jAuditSkuVariationDetails)}');
+      var response = await http.post(
+          url,
+          headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
+          body: json.encode(params)
+      );
+      if (response.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(response.body);
+        print(' data .${data}');
+        if (!data["success"]){
+          tipoerror = 2;
+        }
+        else {
+          for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
+            jAuditSkuVariationDetails[i].sent = 1;
+            DBProvider.db.updateJobSkuVariationDeptAudit(
+                jAuditSkuVariationDetails[i]);
+          }
+        }
+      }
+    } on SocketException catch (e) {
+      //print(' Error en servicio .${e.toString()}');
+      tipoerror = 1;
+    }
+    catch(e){
+      //print(' jAuditSkuVariationDetails already exist in TOMI .${e.toString()}');
+      writeToLog('SendJobDetail: ${e.toString()}');
+      tipoerror = 2;
+    }
+
+    return tipoerror;
   }
 }
 
@@ -226,7 +300,9 @@ class AddForm extends StatelessWidget {
                   ),
                   onChanged: (String? value){
                     try{
-                      jAuditSkuVariationDept.pzas = int.parse(value!) * 1.0;}
+                      jAuditSkuVariationDept.pzas = int.parse(value!) * 1.0;
+                      jAuditSkuVariationDept.audit_New_Quantity = int.parse(value!) * 1.0;
+                    }
                     catch (e){ jAuditSkuVariationDept.pzas = 0; }
                   },
                   inputFormatters: [

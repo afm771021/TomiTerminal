@@ -17,12 +17,20 @@ class _DepartmentSearchScreen extends State<DepartmentSearchScreen> {
   String _scanBarcode = ' ';
   var searchtxt = TextEditingController();
 
-  @override
+  /*@override
   void initState() {
     super.initState();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
+    ]);
+  }*/
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
     ]);
   }
 

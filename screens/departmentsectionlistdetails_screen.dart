@@ -72,13 +72,13 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
       appBar: AppBar(
         title: Text('Department $g_departmentNumber - Section $g_sectionNumber'),
         actions: [
-          IconButton(
+          /*IconButton(
             iconSize: 40,
             onPressed: !isLoading ? () async {
               validaDepartments(departmentSectionList);
             }:null,
             icon: const Icon(Icons.cloud_done),
-          ),
+          ),*/
           IconButton(
             iconSize: 40,
             onPressed: !isLoading ? () async {
@@ -146,7 +146,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                     );
                   });
             }:null,
-            icon: const Icon(Icons.bathtub_outlined),
+            icon: const Icon(Icons.cloud_done),
           )
         ],
       ),
@@ -214,20 +214,76 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                                 onTap: () {
 
                                 },
-                                onLongPress: (){
+                                onLongPress: () async {
                                   writeToLog('Undo action Record Code: ${departmentSectionList[index].code} last action: ${departmentSectionList[index].audit_Action} last new quantity: ${departmentSectionList[index].audit_New_Quantity} last reason code: ${departmentSectionList[index].audit_Reason_Code}');
 
-                                  if (departmentSectionList[index].audit_Action != 3 && departmentSectionList[index].audit_Action != 4 && departmentSectionList[index].audit_Action != 5) {
+                                  /*if (departmentSectionList[index].audit_Action != 5) {
+                                    departmentSectionList[index].audit_New_Quantity = 0.0;
+                                    departmentSectionList[index].audit_Action = 0;
+                                    departmentSectionList[index].audit_Status = 2;
+                                    departmentSectionList[index].audit_Reason_Code = 0;
+                                    departmentSectionList[index].sent = 0;
+                                    DBProvider.db.updateJobSkuVariationDeptAudit(departmentSectionList[index]);*/
+
+                                  if (departmentSectionList[index].audit_Action == 1) {
                                     departmentSectionList[index].audit_New_Quantity = 0.0;
                                     departmentSectionList[index].audit_Action = 0;
                                     departmentSectionList[index].audit_Status = 2;
                                     departmentSectionList[index].audit_Reason_Code = 0;
                                     departmentSectionList[index].sent = 0;
                                     DBProvider.db.updateJobSkuVariationDeptAudit(departmentSectionList[index]);
+                                  }// UndoUpdate
+                                  else if (departmentSectionList[index].audit_Action == 2) {
+                                    print('UndoUpdate');
+                                    departmentSectionList[index].audit_New_Quantity = departmentSectionList[index].pzas;
+                                    departmentSectionList[index].audit_Action = 2;
+                                    departmentSectionList[index].audit_Status = 3;
+                                    departmentSectionList[index].audit_Reason_Code = 0;
+                                    departmentSectionList[index].sent = 0;
+
+                                    var tipoerror = await UndoUpdate(departmentSectionList[index]);
+                                    departmentSectionList[index].audit_New_Quantity = 0.0;
+                                    departmentSectionList[index].audit_Action = 0;
+                                    departmentSectionList[index].audit_Status = 2;
+                                    departmentSectionList[index].audit_Reason_Code = 0;
+
+                                    if(tipoerror == 0) {
+                                      DBProvider.db.updateJobSkuVariationDeptAudit(departmentSectionList[index]);
+                                    }
                                   }
-                                  else if (departmentSectionList[index].audit_Action == 3){
-                                    DBProvider.db.deleteJobSkuVariationDeptAudit(departmentSectionList[index]);
+                                  else if (departmentSectionList[index].audit_Action == 4) {
+                                    print('UndoDelete');
+                                    print('actualizo los registros de tomi a la base local');
+                                    // actualizo los registros de tomi a la base local
+                                    DBProvider.db.downloadDepartmentSectionSkuToAudit();
+                                    // Verificar si el parametro es menor al valor del producto ó si el estatus es cancelado (por el auditor)
+                                    int? amount = await DBProvider.db.alert_Higher_Amount();
+                                    print('verifica si el valor ${departmentSectionList[index].pzas * departmentSectionList[index].sale_Price} es < que la alerta: ${amount}');
+                                    if ((departmentSectionList[index].pzas * departmentSectionList[index].sale_Price) < amount! || departmentSectionList[index].audit_Status == 5 )
+                                    {
+                                      departmentSectionList[index].audit_Action = 2;
+                                      departmentSectionList[index].audit_Status = 3;
+                                      departmentSectionList[index].audit_Reason_Code = 0;
+                                      departmentSectionList[index].sent = 0;
+
+                                      var tipoerror = await UndoDelete(departmentSectionList[index]);
+                                      departmentSectionList[index].audit_Action = 0;
+                                      departmentSectionList[index].audit_Status = 2;
+                                      departmentSectionList[index].audit_Reason_Code = 0;
+
+                                      if(tipoerror == 0) {
+                                        DBProvider.db.updateJobSkuVariationDeptAudit(departmentSectionList[index]);
+                                      }
+                                    }
                                   }
+                                  else if (departmentSectionList[index].audit_Action == 3)
+                                    {
+                                      print('UndoAdd');
+                                      DBProvider.db.deleteJobSkuVariationDeptAudit(departmentSectionList[index]);
+                                    }
+
+                                  // UndoAdd
+
                                 },
                                 //leading: const Icon(Icons.person),
                                 title: Row(
@@ -463,12 +519,12 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                                               departmentSectionList[index].audit_Reason_Code = 0;
                                               var tipoerror = await sendOKJobDetail(departmentSectionList[index]);
 
-                                              if (tipoerror == 0){
+                                              /*if (tipoerror == 0){
                                                 departmentSectionList[index].sent = 1;
-                                              }
-
+                                              }*/
                                               DBProvider.db.updateJobSkuVariationDeptAudit(departmentSectionList[index]);
                                               //print('ok');
+
                                             },
                                             icon: const Icon(
                                               Icons.check_circle_outline,
@@ -512,7 +568,29 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
     );
   }
 
-  Future<int> sendOKJobDetail(jobAuditSkuVariationDept jAuditSkuVariationDetailsRecord) async {
+
+
+  Future<int> UndoDelete(jobAuditSkuVariationDept jAuditSkuVariationDetailsRecord) async {
+    var tipoerror = 0;
+    var uri = '${Preferences.servicesURL}/api/Audit/UndoDeleteUpdateJobDetailAuditAsync/${g_customerId}/${g_storeId}/${g_stockDate}/${jAuditSkuVariationDetailsRecord.rec.round()}';
+    var url = Uri.parse(uri);
+    print(url);
+    var response = await http.get(url);
+    print(response.body);
+    print ('UndoDelete: ${json.decode(response.body)}');
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = jsonDecode(response.body);
+      print('UndoDelete data .${data}');
+      if (!data["success"]) {
+        tipoerror = 2;
+      }
+    }
+
+    return tipoerror;
+  }
+
+  Future<int> UndoUpdate(jobAuditSkuVariationDept jAuditSkuVariationDetailsRecord) async {
 
     //Enviar a la base de TOMI los registros con los cambios auditados
 
@@ -521,7 +599,84 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
     var tipoerror = 0;
     var url = Uri.parse('${Preferences.servicesURL}/api/Audit/GetSkuVariationDetailsAuditAsync'); // IOS
 
+    //final auditorSkuVariationDept = await DBProvider.db.getAuditorSkuVariationDeptAuditedandPendingtosend();
+    //jAuditSkuVariationDetails = [...?auditorSkuVariationDept];
+
     jAuditSkuVariationDetails.add(jAuditSkuVariationDetailsRecord);
+    //writeToLog('Count Records to UndoUpdate: ${jAuditSkuVariationDetails.length}');
+    print('Count Records to UndoUpdate: ${jAuditSkuVariationDetails.length}');
+
+    for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
+      jAuditSkuVariationDetails[i].audit_Status = (jAuditSkuVariationDetails[i].audit_Action == 1)?jAuditSkuVariationDetails[i].audit_Status = 4:jAuditSkuVariationDetails[i].audit_Status = 3;
+      print(jAuditSkuVariationDetails[i].toJson());
+      //writeToLog('record: i - Json: ${jAuditSkuVariationDetails[i].toJson().toString()}');
+    }
+
+    try {
+      List jsonTags = jAuditSkuVariationDetails.map((jAuditSkuVariationDetails) => jAuditSkuVariationDetails.toJson()).toList();
+      var params = {
+        'customerId':g_customerId,
+        'storeId': g_storeId,
+        'stockDate' : g_stockDate.toString(),
+        'departmentId' : g_departmentNumber,
+        'sectionId': g_sectionNumber,
+        'closeSection' : 0,
+        'skuVariationAuditModel' : jAuditSkuVariationDetails
+      };
+      print(' url: ${url}');
+      print(' params:${json.encode(params)}');
+      print(' jAuditSkuVariationDetails:${json.encode(jAuditSkuVariationDetails)}');
+      var response = await http.post(
+          url,
+          headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
+          body: json.encode(params)
+      );
+      if (response.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(response.body);
+        print(' data .${data}');
+        if (!data["success"]){
+          tipoerror = 2;
+        }
+        else {
+          for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
+            jAuditSkuVariationDetails[i].sent = 0;
+            DBProvider.db.updateJobSkuVariationDeptAudit(
+                jAuditSkuVariationDetails[i]);
+          }
+        }
+      }
+    } on SocketException catch (e) {
+      //print(' Error en servicio .${e.toString()}');
+      tipoerror = 1;
+    }
+    catch(e){
+      //print(' jAuditSkuVariationDetails already exist in TOMI .${e.toString()}');
+      writeToLog('SendJobDetail: ${e.toString()}');
+      tipoerror = 2;
+    }
+
+    return tipoerror;
+  }
+
+
+  Future<int> sendOKJobDetail(jobAuditSkuVariationDept jAuditSkuVariationDetailsRecord) async {
+
+    //Enviar a la base de TOMI los registros con los cambios auditados
+
+    // Agregar a la colección los registros que estan ya procesados y no han sido enviados aún (audit_action > 0 && sent ==0)
+
+    List<jobAuditSkuVariationDept> jAuditSkuVariationDetails = [];
+
+    var i = 0;
+    var tipoerror = 0;
+    var url = Uri.parse('${Preferences.servicesURL}/api/Audit/GetSkuVariationDetailsAuditAsync'); // IOS
+
+    final auditorSkuVariationDept = await DBProvider.db.getAuditorSkuVariationDeptAuditedandPendingtosend();
+    jAuditSkuVariationDetails = [...?auditorSkuVariationDept];
+
+    jAuditSkuVariationDetails.add(jAuditSkuVariationDetailsRecord);
+    print('Count Records to send: ${jAuditSkuVariationDetails.length}');
+
     writeToLog('Count Records to send: ${jAuditSkuVariationDetails.length}');
 
     for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
@@ -554,6 +709,12 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
         print(' data .${data}');
         if (!data["success"]){
           tipoerror = 2;
+        }
+        else{
+          for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
+            jAuditSkuVariationDetails[i].sent = 1;
+            DBProvider.db.updateJobSkuVariationDeptAudit(jAuditSkuVariationDetails[i]);
+          }
         }
       }
     } on SocketException catch (e) {
@@ -637,7 +798,8 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
 
       var tipoerror = await sendJobDetail(jobSkuVariation);
 
-      if (tipoerror == 0){
+
+      if (tipoerror == 0 ){ // && tipoerrornew== 0){
         final route = MaterialPageRoute(
             builder: (context) => const DepartmentSearchScreen());
         Navigator.pushReplacement(context, route);
@@ -719,16 +881,28 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
     List<jobAuditSkuVariationDept> jAuditSkuVariationDetailsTmp = [];
 
     for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
-      jAuditSkuVariationDetails[i].audit_Status = (jAuditSkuVariationDetails[i].audit_Action == 1)?jAuditSkuVariationDetails[i].audit_Status = 4:jAuditSkuVariationDetails[i].audit_Status = 3;
+      jAuditSkuVariationDetails[i].audit_Status = (jAuditSkuVariationDetails[i].audit_Action == 1 || jAuditSkuVariationDetails[i].audit_Action == 6)?jAuditSkuVariationDetails[i].audit_Status = 4:jAuditSkuVariationDetails[i].audit_Status = 3;
       //print('rec: ${jAuditSkuVariationDetails[i].rec} sent : ${jAuditSkuVariationDetails[i].sent}');
       //print(jAuditSkuVariationDetails[i].toJson());
       //writeToLog('record: i - Json: ${jAuditSkuVariationDetails[i].toJson().toString()}');
-      if (jAuditSkuVariationDetails[i].sent == 0)
+      if (jAuditSkuVariationDetails[i].sent == 0 && jAuditSkuVariationDetails[i].audit_Action != 3)
         {
           jAuditSkuVariationDetailsTmp.add(jAuditSkuVariationDetails[i]);
         }
     }
-    print('Count Records not sended: ${jAuditSkuVariationDetailsTmp.length}');
+
+    for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
+      if (jAuditSkuVariationDetails[i].sent == 0 && jAuditSkuVariationDetails[i].audit_Action == 3)
+      {
+        jAuditSkuVariationDetailsTmp.add(jAuditSkuVariationDetails[i]);
+      }
+    }
+
+    print('sendJobDetail : Count Records not sended audit_Action: ${jAuditSkuVariationDetailsTmp.length}');
+    for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
+        print(jAuditSkuVariationDetails[i].rec);
+    }
+
     try {
       List jsonTags = jAuditSkuVariationDetails.map((jAuditSkuVariationDetails) => jAuditSkuVariationDetails.toJson()).toList();
       var params = {
@@ -742,7 +916,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
       };
       // print(' url: ${url}');
       // print(' params:${json.encode(params)}');
-      // print(' jAuditSkuVariationDetails:${json.encode(jAuditSkuVariationDetails)}');
+      //print(' jAuditSkuVariationDetails:${json.encode(jAuditSkuVariationDetailsTmp)}');
       var response = await http.post(
           url,
           headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
@@ -750,26 +924,30 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
       );
       if (response.statusCode == 200) {
         Map<String, dynamic> data = jsonDecode(response.body);
-        //print(' data .${data}');
+        print(' data1 .${data}');
         if (!data["success"]){
           tipoerror = 2;
         }
         else{
           for (i = 0; i < jAuditSkuVariationDetailsTmp.length; i++) {
-            jAuditSkuVariationDetailsTmp[i].sent = 1;
-            DBProvider.db.updateJobSkuVariationDeptAudit(jAuditSkuVariationDetailsTmp[i]);
+            if (jAuditSkuVariationDetails[i].sent == 0 && jAuditSkuVariationDetails[i].audit_Action != 3)
+            {
+              jAuditSkuVariationDetailsTmp[i].sent = 1;
+              DBProvider.db.updateJobSkuVariationDeptAudit(jAuditSkuVariationDetailsTmp[i]);
+            }
           }
         }
       }
     } on SocketException catch (e) {
-      //print(' Error en servicio .${e.toString()}');
+      print(' Error en servicio .${e.toString()}');
       tipoerror = 1;
     }
     catch(e){
-      //print(' jAuditSkuVariationDetails already exist in TOMI .${e.toString()}');
+      print(' jAuditSkuVariationDetails already exist in TOMI .${e.toString()}');
       writeToLog('SendJobDetail: ${e.toString()}');
       tipoerror = 2;
     }
+
     isLoading = false;
     setState(() {});
 
@@ -802,6 +980,8 @@ class _HeaderScreen extends StatelessWidget {
                 ),
        );
   }
+
+
 }
 
 

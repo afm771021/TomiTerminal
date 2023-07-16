@@ -119,9 +119,9 @@ class _DepartmentSectionEditScreenState extends State<DepartmentSectionEditScree
             // aqui se envia el registro a tOMI
             var tipoerror = await sendEditJobDetail(widget.jAuditSkuVariationDept);
 
-            if (tipoerror == 0){
+            /*if (tipoerror == 0){
               widget.jAuditSkuVariationDept.sent = 1;
-            }
+            }*/
             //print('jAuditSkuVariationDept.sent: ${widget.jAuditSkuVariationDept.sent}');
             DBProvider.db.updateJobSkuVariationDeptAudit(widget.jAuditSkuVariationDept);
 
@@ -138,14 +138,17 @@ class _DepartmentSectionEditScreenState extends State<DepartmentSectionEditScree
   Future<int> sendEditJobDetail(jobAuditSkuVariationDept jAuditSkuVariationDetailsRecord) async {
 
     //Enviar a la base de TOMI los registros con los cambios auditados
-
     List<jobAuditSkuVariationDept> jAuditSkuVariationDetails = [];
     var i = 0;
     var tipoerror = 0;
     var url = Uri.parse('${Preferences.servicesURL}/api/Audit/GetSkuVariationDetailsAuditAsync'); // IOS
 
+    final auditorSkuVariationDept = await DBProvider.db.getAuditorSkuVariationDeptAuditedandPendingtosend();
+    jAuditSkuVariationDetails = [...?auditorSkuVariationDept];
+
     jAuditSkuVariationDetails.add(jAuditSkuVariationDetailsRecord);
-    writeToLog('Count Records to send: ${jAuditSkuVariationDetails.length}');
+    //writeToLog('Count Records to send: ${jAuditSkuVariationDetails.length}');
+    print('sendEditJobDetail Count Records to send: ${jAuditSkuVariationDetails.length}');
 
     for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
       jAuditSkuVariationDetails[i].audit_Status = (jAuditSkuVariationDetails[i].audit_Action == 1)?jAuditSkuVariationDetails[i].audit_Status = 4:jAuditSkuVariationDetails[i].audit_Status = 3;
@@ -177,6 +180,13 @@ class _DepartmentSectionEditScreenState extends State<DepartmentSectionEditScree
         print(' data .${data}');
         if (!data["success"]){
           tipoerror = 2;
+        }
+        else {
+          for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
+            jAuditSkuVariationDetails[i].sent = 1;
+            DBProvider.db.updateJobSkuVariationDeptAudit(
+                jAuditSkuVariationDetails[i]);
+          }
         }
       }
     } on SocketException catch (e) {

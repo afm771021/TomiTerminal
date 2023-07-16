@@ -123,9 +123,9 @@ class _DepartmentSectionDeleteScreenState extends State<DepartmentSectionDeleteS
 
                             var tipoerror = await sendDeleteJobDetail(widget.jAuditSkuVariationDept);
 
-                            if (tipoerror == 0){
+                            /*if (tipoerror == 0){
                               widget.jAuditSkuVariationDept.sent = 1;
-                            }
+                            }*/
                             writeToLog('Delete Record: ${widget.jAuditSkuVariationDept.code}');
                             DBProvider.db.updateJobSkuVariationDeptAudit(widget.jAuditSkuVariationDept);
                             Navigator.pushReplacementNamed(context, 'DepartmentSectionListDetails');
@@ -152,8 +152,12 @@ class _DepartmentSectionDeleteScreenState extends State<DepartmentSectionDeleteS
     var tipoerror = 0;
     var url = Uri.parse('${Preferences.servicesURL}/api/Audit/GetSkuVariationDetailsAuditAsync'); // IOS
 
+    final auditorSkuVariationDept = await DBProvider.db.getAuditorSkuVariationDeptAuditedandPendingtosend();
+    jAuditSkuVariationDetails = [...?auditorSkuVariationDept];
+
     jAuditSkuVariationDetails.add(jAuditSkuVariationDetailsRecord);
-    writeToLog('Count Records to send: ${jAuditSkuVariationDetails.length}');
+   // writeToLog('Count Records to send: ${jAuditSkuVariationDetails.length}');
+    print('Count Records to send: ${jAuditSkuVariationDetails.length}');
 
     for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
       jAuditSkuVariationDetails[i].audit_Status = (jAuditSkuVariationDetails[i].audit_Action == 1)?jAuditSkuVariationDetails[i].audit_Status = 4:jAuditSkuVariationDetails[i].audit_Status = 3;
@@ -185,6 +189,13 @@ class _DepartmentSectionDeleteScreenState extends State<DepartmentSectionDeleteS
         print(' data .${data}');
         if (!data["success"]){
           tipoerror = 2;
+        }
+        else {
+          for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
+            jAuditSkuVariationDetails[i].sent = 1;
+            DBProvider.db.updateJobSkuVariationDeptAudit(
+                jAuditSkuVariationDetails[i]);
+          }
         }
       }
     } on SocketException catch (e) {

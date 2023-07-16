@@ -169,6 +169,8 @@ class JobDetailsEditScreen extends StatelessWidget {
     );
   }
 
+
+
   Future<int> determine_alert(jobDetailAudit jdetailaudit, int quantity, int amount) async {
     bool diferencequantity = false;
     bool diferenceamount = false;

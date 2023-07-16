@@ -263,7 +263,9 @@ class AddForm extends StatelessWidget {
                   ),
                   onChanged: (String? value){
                     try{
-                     jdetailaudit.quantity = int.parse(value!) * 1.0;}
+                     jdetailaudit.quantity = int.parse(value!) * 1.0;
+                     jdetailaudit.audit_New_Quantity = int.parse(value!) * 1.0;
+                    }
                      catch (e){ jdetailaudit.quantity = 0; }
                   },
                   inputFormatters: [

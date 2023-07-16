@@ -12,4 +12,14 @@ class JobDetailsListProvider extends ChangeNotifier{
     //print('JobDetailsListProvider');
     notifyListeners();
   }
+
+  getAuditorJobDetails(int customerId, int storeId, DateTime stockDate) async{
+
+    //DBProvider.db.downloadAuditorDepartmentSectionSkuToAudit();
+
+    final jobDetails = await DBProvider.db.getAuditorJobDetailsAudit( customerId,  storeId,  stockDate);
+    this.jobDetails = [...?jobDetails];
+    //print('JobDetailsListProvider');
+    notifyListeners();
+  }
 }

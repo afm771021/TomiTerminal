@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../providers/db_provider.dart';
 import '../widgets/tomiterminal_menu.dart';
+import 'auditorlistdetails_screen.dart';
 import 'screens.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -32,10 +33,19 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
+  }
+
+
+  /*void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-  }
+  }*/
 
   Future<void> writeToLog(String log) async {
     final directory = await getApplicationDocumentsDirectory();
@@ -180,9 +190,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> onSubmit(String name, String inventorykey) async {
-
+    //print('onSubmit:');
     try {
       var url = Uri.parse('${Preferences.servicesURL}/api/Audit/auditauthenticate');
+      //print('url: ${url}');
+      //var url = Uri.parse('https://localhost:8085/api/Audit/auditauthenticate');
       var respuesta = await http.post(
           url,
           headers: <String, String>{
@@ -195,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (respuesta.statusCode == 200) {
         var loginResponseBody = (jsonDecode(respuesta.body));
-       // print('statusCode: ${respuesta.body}');
+        //print('statusCode: ${respuesta.body}');
         if (!loginResponseBody['success']) {
           showDialog(
               barrierDismissible: true,
@@ -310,12 +322,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   builder: (context) => const TagSearchScreen());
               final department_route = MaterialPageRoute(
                   builder: (context) => const DepartmentSearchScreen());
+              final auditor_route = MaterialPageRoute(
+                  builder: (context) => const AuditorListDetailsScreen());
 
               if (g_auditType == 1)
                 Navigator.pushReplacement(context, route);
-              else
+              else if(g_user_rol == 'SUPERVISOR')
                 Navigator.pushReplacement(context, department_route);
-              //print('totalalerts');
+              else if(g_user_rol == 'AUDITOR'){
+                print('cargar pantalla AUDITOR');
+                //DBProvider.db.downloadAuditorDepartmentSectionSkuToAudit();
+                Navigator.pushReplacement(context, auditor_route);
+              }
+              print('totalalerts');
             }
             else {
               showDialog(
@@ -350,7 +369,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     }
     catch(e) {
-      //print('Error ${e}');
+      print('Error ${e}');
       showDialog(
           barrierDismissible: true,
           context: context,

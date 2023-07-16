@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tomi_terminal_audit2/screens/auditorlistdetails_screen.dart';
 import 'package:tomi_terminal_audit2/util/globalvariables.dart';
 import 'dart:math' as math;
 import '../screens/screens.dart';
@@ -36,12 +37,23 @@ class TomiTerminalMenu extends StatelessWidget {
             ),
           ),
           Visibility(
-            visible: (g_login && g_auditType == 2)?true:false,
+            visible: (g_login && g_auditType == 2 && g_user_rol == 'SUPERVISOR')?true:false,
             child: ListTile(
               leading:  const Icon( Icons.search, color: Colors.indigo,),
               title:  const Text('Search Department'),
               onTap: (){
                 final route = MaterialPageRoute(builder: (context) => const DepartmentSearchScreen());
+                Navigator.pushReplacement(context, route);
+              },
+            ),
+          ),
+          Visibility(
+            visible: (g_login && g_auditType == 2 && g_user_rol == 'AUDITOR')?true:false,
+            child: ListTile(
+              leading:  const Icon( Icons.search, color: Colors.indigo,),
+              title:  const Text('Auditor'),
+              onTap: (){
+                final route = MaterialPageRoute(builder: (context) => const AuditorListDetailsScreen());
                 Navigator.pushReplacement(context, route);
               },
             ),

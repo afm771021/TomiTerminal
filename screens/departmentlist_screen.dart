@@ -17,11 +17,20 @@ class DepartmentListScreen extends StatefulWidget {
 
 class _DepartmentListScreenState extends State<DepartmentListScreen> {
 
-  void initState() {
+  /*void initState() {
     super.initState();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
+    ]);
+  }*/
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
     ]);
   }
 
@@ -59,6 +68,7 @@ class _DepartmentListScreenState extends State<DepartmentListScreen> {
                     print('g_departmentNumber: ${g_departmentNumber}');
                     print('g_sectionNumber:${g_sectionNumber}');
                   });
+
                   DBProvider.db.downloadDepartmentSectionSkuToAudit();
                   Navigator.pushReplacementNamed(context, 'DepartmentSectionListDetails');
                 },

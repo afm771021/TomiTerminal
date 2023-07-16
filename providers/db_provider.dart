@@ -192,12 +192,20 @@ class DBProvider{
 
   Future<int?> updateJobDetailAudit(jobDetailAudit jda) async {
     final db = await database;
-    //print(jda.toJson());
+    int? res = 0;
+    print('updateJobDetailAudit:');
+    print(jda.toJson());
+    try {
+      res = await db?.update('JOB_DETAILS_AUDIT',
+          jda.toJson(),
+          where : 'CUSTOMER_ID = ? and STORE_ID = ? and STOCK_DATE = ? and JOB_DETAILS_ID = ? and TAG_NUMBER = ?',
+          whereArgs: [jda.customer_Id, jda.store_Id, jda.stock_Date.toString().substring(0,10), jda.job_Details_Id, jda.tag_Number]);
 
-    final res = await db?.update('JOB_DETAILS_AUDIT',
-                                jda.toJson(),
-                                where : 'CUSTOMER_ID = ? and STORE_ID = ? and STOCK_DATE = ? and JOB_DETAILS_ID = ? and TAG_NUMBER = ?',
-                                whereArgs: [jda.customer_Id, jda.store_Id, jda.stock_Date.toString().substring(0,10), jda.job_Details_Id, jda.tag_Number]);
+    } on DatabaseException
+    catch(e) {
+      print(e);
+    }
+
     return res;
   }
 
@@ -332,7 +340,8 @@ class DBProvider{
     } on DatabaseException
     catch(e) {
       //log(e.toString());
-      print('SKU_VARIATION_DEPT_AUDIT already exist.');
+      print('SKU_VARIATION_DEPT_AUDIT update exist: ${jda.rec}');
+      updateJobSkuVariationDeptAudit(jda);
     }
 
     return res;
@@ -356,14 +365,15 @@ class DBProvider{
       jda.operation = 1;
     }
 
-    //print('nuevoJobDetailAudit: ${jda.code}');
+    print('nuevoJobDetailAudit: ${jda.code}');
 
     try {
        res = (await db?.insert('JOB_DETAILS_AUDIT', jda.toJson()))!;
     } on DatabaseException
     catch(e) {
       //log(e.toString());
-      //print('JOB_DETAILS_AUDIT already exist.');
+      print(e);
+       updateJobDetailAudit(jda);
     }
 
     return res;
@@ -459,6 +469,40 @@ class DBProvider{
     return list;
   }
 
+
+  Future<List<jobAuditSkuVariationDept>?> getAuditorSkuVariationDeptAuditedandPendingtosend() async{
+    final db = await database;
+    final orderBy = 'ABS(VALUACION) DESC, SKU, TAG, REC';
+    final res = await db?.query('SKU_VARIATION_DEPT_AUDIT', where: 'customer_Id = ? and store_Id = ? and stock_Date = ? and department_id = ? and section_id = ? and audit_action > ? and sent = ? and audit_action != ?',
+      whereArgs: [g_customerId, g_storeId, g_stockDate.toString().substring(0,10),g_departmentNumber,g_sectionNumber,0,0,3],
+      orderBy: orderBy,
+    );
+    print('getAuditorSkuVariationDeptAuditedandPendingtosend:${res}');
+    return res?.map((s) => jobAuditSkuVariationDept.fromJson(s)).toList();
+  }
+
+  Future<List<jobAuditSkuVariationDept>?> getAuditorSkuVariationDeptAuditedandNewPendingtosend() async{
+    final db = await database;
+    final orderBy = 'ABS(VALUACION) DESC, SKU, TAG, REC';
+    final res = await db?.query('SKU_VARIATION_DEPT_AUDIT', where: 'customer_Id = ? and store_Id = ? and stock_Date = ? and department_id = ? and section_id = ? and audit_action = ? and sent = ?',
+      whereArgs: [g_customerId, g_storeId, g_stockDate.toString().substring(0,10),g_departmentNumber,g_sectionNumber,3,0],
+      orderBy: orderBy,
+    );
+    print('getAuditorSkuVariationDeptAuditedandNewPendingtosend:${res}');
+    return res?.map((s) => jobAuditSkuVariationDept.fromJson(s)).toList();
+  }
+
+  Future<List<jobAuditSkuVariationDept>?> getAuditorSkuVariationDeptToAudit(int customerId, int storeId, DateTime stockDate) async{
+    final db = await database;
+    final orderBy = 'ABS(VALUACION) DESC, SKU, TAG, REC';
+    final res = await db?.query('SKU_VARIATION_DEPT_AUDIT', where: 'customer_Id = ? and store_Id = ? and stock_Date = ? and department_id = ? and section_id = ?',
+      whereArgs: [customerId, storeId, stockDate.toString().substring(0,10)],
+      orderBy: orderBy,
+    );
+    //print('getJobAuditSkuVariationDeptToAudit:${res}');
+    return res?.map((s) => jobAuditSkuVariationDept.fromJson(s)).toList();
+  }
+
   Future<JobGetIndicators> getIndicators() async {
     var uri = '${Preferences.servicesURL}/api/Job/GetIndicators/${g_customerId}/${g_storeId}/${g_stockDate}';
     var url = Uri.parse(uri);
@@ -473,6 +517,14 @@ class DBProvider{
     final db = await database;
     final res = await db?.query('JOB_DETAILS_AUDIT', where: 'customer_Id = ? and store_Id = ? and stock_Date = ? and tag_number = ? and operation = ?',
                                                       whereArgs: [customerId, storeId, stockDate.toString().substring(0,10), tagNumber, operation]);
+    //print(res);
+    return res?.map((s) => jobDetailAudit.fromJson(s)).toList();
+  }
+
+  Future<List<jobDetailAudit>?> getAuditorJobDetailsAudit(int customerId, int storeId, DateTime stockDate) async{
+    final db = await database;
+    final res = await db?.query('JOB_DETAILS_AUDIT', where: 'customer_Id = ? and store_Id = ? and stock_Date = ?', // and  Audit_action < 7
+        whereArgs: [customerId, storeId, stockDate.toString().substring(0,10)]);
     //print(res);
     return res?.map((s) => jobDetailAudit.fromJson(s)).toList();
   }
@@ -516,6 +568,26 @@ DEPARTMENTS
       nuevoJobAuditSkuVariationDept(list[i]);
       //print('Lista: ${i}');
       //print('Lista: $list[i]');
+    }
+  }
+
+  /* Descarga en la tablet todos los registros por validar por el Auditor para SORIANA*/
+  Future<void> downloadAuditorDepartmentSectionSkuToAudit() async {
+
+    //GetAuditTagToProcessAsync/{operation:int}/{customerId:int}/{storeId:int}/{stockDate:DateTime}
+    var uri = '${Preferences.servicesURL}/api/Audit/GetAuditTagToProcessAsync/1/${g_customerId}/${g_storeId}/${g_stockDate}';
+    var url = Uri.parse(uri);
+    print (uri);
+    var response = await http.get(url);
+    print (response.body);
+    final List parsedList = json.decode(response.body);
+    //print('downloadAuditorDepartmentSectionSkuToAudit: ${parsedList}');
+    //List<jobAuditSkuVariationDept> list = parsedList.map((e) => jobAuditSkuVariationDept.fromTOMIDBJson(e)).toList();
+    List<jobDetailAudit> list = parsedList.map((e) => jobDetailAudit.fromTomiDBJson(e)).toList();
+
+    for(var i=0;i<list.length;i++){
+      //print(list[i]);
+      nuevoJobDetailAudit(list[i]);
     }
   }
 
@@ -706,6 +778,48 @@ DEPARTMENTS
       nuevoAlert(list[i]);
     }
     return i;
+  }
+
+  Future<int> AuditProcesOneChange(jobDetailAudit jobDetails, int action) async{
+
+    var tipoerror = 0;
+    var url = Uri.parse('${Preferences.servicesURL}/api/Audit/AuditMassChange'); // IOS
+
+    List<double> jobDetailsAudit = [];
+    jobDetailsAudit.add(jobDetails.job_Details_Id);
+
+    try {
+      var params = {
+        'customerId':g_customerId,
+        'storeId': g_storeId,
+        'stockDate' : g_stockDate.toString(),
+        'operation' : 1,
+        'action': action,
+        'jobDetailsIds' : jobDetailsAudit
+      };
+      print(' params:${json.encode(params)}');
+      print(' jobDetailAuditModel:${json.encode(jobDetails)}');
+      var response = await http.post(
+          url,
+          headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
+          body: json.encode(params)
+      );
+      if (response.statusCode == 200) {
+        Map<String, dynamic> data = jsonDecode(response.body);
+        //print(' data .${data}');
+        if (!data["success"]){
+          tipoerror = 2;
+        }
+      }
+    } on SocketException catch (e) {
+      //print(' Error en servicio .${e.toString()}');
+      tipoerror = 1;
+    }
+    catch(e){
+      tipoerror = 2;
+    }
+
+    return tipoerror;
   }
 
   /*
