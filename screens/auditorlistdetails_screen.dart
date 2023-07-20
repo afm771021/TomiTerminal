@@ -29,9 +29,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-
     DBProvider.db.downloadAuditorDepartmentSectionSkuToAudit();//Descarga los registros a Auditar
-
   }
 
   @override
@@ -47,13 +45,19 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
         title: const Text('Auditor'),
           actions: [
                 IconButton(
-                iconSize: 40,
-                onPressed: !isLoading ? () async {
-                  //DBProvider.db.downloadAuditorDepartmentSectionSkuToAudit();
-                  validaJobDetail(context, jobDetails);
-                }:null,
-                icon: const Icon(Icons.cloud_done),
-              ),
+                  iconSize: 40,
+                  onPressed: !isLoading ? () async {
+                    DBProvider.db.downloadAuditorDepartmentSectionSkuToAudit();
+                  }:null,
+                  icon: const Icon(Icons.downloading),
+                ),
+                IconButton(
+                    iconSize: 40,
+                    onPressed: !isLoading ? () async {
+                      validaJobDetail(context, jobDetails);
+                    }:null,
+                    icon: const Icon(Icons.cloud_done),
+                  ),
           ]
         ),
       drawer: const TomiTerminalMenu(),
@@ -118,21 +122,21 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                 Column(
                                                   children: [
                                                     Text(
-                                                      '         ${jobDetails[index].audit_Action == 5 ||
-                                                          jobDetails[index].audit_Action == 2 ? '   UPDATE' : jobDetails[index].audit_Action == 3 ? '    ADD' : '   DELETE'}', maxLines: 1,
+                                                      '${jobDetails[index].audit_Action == 5 ||
+                                                          jobDetails[index].audit_Action == 2 ? 'UPDATE' : jobDetails[index].audit_Action == 3 ? ' ADD' : ' DELETE'}', maxLines: 1,
                                                       overflow: TextOverflow.ellipsis,)
                                                   ],
                                                 ),
                                                 Column(
                                                   children: [
                                                     Text(
-                                                      '          ${jobDetails[index].audit_New_Quantity}     ', maxLines: 1, overflow: TextOverflow.ellipsis,)
+                                                      ' ${jobDetails[index].audit_New_Quantity}     ', maxLines: 1, overflow: TextOverflow.ellipsis,)
                                                   ],
                                                 ),
                                                 Column(
                                                   children: [
                                                     Text(
-                                                      '  ${jobDetails[index].tag_Number} ', maxLines: 1, overflow: TextOverflow
+                                                      '${jobDetails[index].tag_Number} ', maxLines: 1, overflow: TextOverflow
                                                         .ellipsis,)
                                                   ],
                                                 ),
@@ -184,13 +188,34 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 Visibility(
+                                                    visible:true,
+                                                    child:
+                                                    IconButton(
+                                                        iconSize: 40,
+                                                        onPressed: () async {
+                                                          print('IM:');
+                                                          //${jobDetails[index].job_Details_Id}');
+                                                          // jobDetails[index].audit_Action = 8;
+                                                          _mostrarVentanaEmergente(context, jobDetails[index]);
+
+                                                          //int ProcesOk = await DBProvider.db.AuditProcesOneChange(jobDetails[index], 1, 8);
+                                                          //if (ProcesOk == 0) {
+                                                          //  DBProvider.db.updateJobDetailAudit(jobDetails[index]);
+                                                          //}
+                                                        },
+                                                        icon: const Icon(Icons.lock_person, color: Colors.red,
+                                                        )
+                                                    )
+                                                ),
+
+                                                Visibility(
                                                     visible: (jobDetails[index].audit_Action < 7) ? true : false,
                                                     child:
                                                     IconButton(
                                                         iconSize: 40,
                                                         onPressed: () async {
                                                           print('CANCEL:${jobDetails[index].job_Details_Id}');jobDetails[index].audit_Action = 8;
-                                                          int ProcesOk = await DBProvider.db.AuditProcesOneChange(jobDetails[index], 2);
+                                                          int ProcesOk = await DBProvider.db.AuditProcesOneChange(jobDetails[index], 2, 9);
                                                           if (ProcesOk == 0) {
                                                             DBProvider.db.updateJobDetailAudit(jobDetails[index]);
                                                           }
@@ -216,8 +241,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                         onPressed: () async {
                                                           print('PROCESS:${jobDetails[index].job_Details_Id}');
                                                           jobDetails[index].audit_Action = 7;
-                                                          int ProcesOk = await DBProvider.db.AuditProcesOneChange(jobDetails[index],
-                                                              1);
+                                                          int ProcesOk = await DBProvider.db.AuditProcesOneChange(jobDetails[index], 1,9);
                                                           if (ProcesOk == 0) {
                                                             DBProvider.db.updateJobDetailAudit(jobDetails[index]);
                                                           }
@@ -275,9 +299,9 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
 
     var tipoerror = 0;
 
-    //tipoerror = await AuditProcess(jobDetailsAudit,1);
+    tipoerror = await AuditProcess(jobDetailsAudit,1,7);
 
-    if (tipoerror == 0) {
+    if (tipoerror > 0) {
       showDialog(
           barrierDismissible: true,
           context: context,
@@ -303,6 +327,15 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
           }
         );
       }
+    else{
+      for (i = 0; i < jobDetails.length; i++) {
+        if (jobDetails[i].audit_Status != 4 && (jobDetails[i].audit_Action == 4 || jobDetails[i].audit_Action == 5)){
+          jobDetails[i].audit_Status = 4;
+          DBProvider.db.updateJobDetailAudit(jobDetails[i]);
+        }
+      }
+    }
+
     /*if (noprocesados > 0) {
       showDialog(
           barrierDismissible: true,
@@ -395,7 +428,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
     */
   }
 
-  Future<int> AuditProcess(List<double> jobDetailsAudit, int action) async{
+  Future<int> AuditProcess(List<double> jobDetailsAudit, int action, int sourceAction) async{
     var tipoerror = 0;
     var url = Uri.parse('${Preferences.servicesURL}/api/Audit/AuditMassChange'); // IOS
 
@@ -406,6 +439,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
         'stockDate' : g_stockDate.toString(),
         'operation' : 1,
         'action': action,
+        'sourceAction' : sourceAction,
         'jobDetailsIds' : jobDetailsAudit
       };
       print(' params:${json.encode(params)}');
@@ -414,6 +448,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
           headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
           body: json.encode(params)
       );
+      print(jobDetailsAudit);
       if (response.statusCode == 200) {
         Map<String, dynamic> data = jsonDecode(response.body);
         if (!data["success"]){
@@ -429,6 +464,71 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
     }
 
     return tipoerror;
+  }
+
+  final String _contrasena = g_im_password; // Valor de la variable con la contraseña
+
+  void _mostrarVentanaEmergente(BuildContext context, jobDetailAudit jda) {
+    String _contrasenaIngresada = ""; // Variable local para almacenar la contraseña ingresada
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Ingresa una contraseña'),
+          content: TextField(
+            decoration: InputDecoration(hintText: 'Contraseña'),
+            obscureText: true, // Oculta los caracteres ingresados
+            onChanged: (value) {
+              _contrasenaIngresada = value; // Actualiza la variable local con la contraseña ingresada
+            },
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Aceptar'),
+              onPressed: () async {
+                // Compara la contraseña ingresada con el valor de la variable
+                print('_contrasenaIngresada: ${_contrasenaIngresada} _contrasena: ${_contrasena}');
+
+                if (_contrasenaIngresada == _contrasena) {
+                   print('Contraseña Correcta');
+                   jda.audit_Action = 8;
+                   int ProcesOk = await DBProvider.db.AuditProcesOneChange(jda, 1, 8);
+                   if (ProcesOk == 0) {
+                   DBProvider.db.updateJobDetailAudit(jda);
+                   }
+                  Navigator.of(context).pop();
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Contraseña incorrecta'),
+                        content: Text('La contraseña ingresada es incorrecta.'),
+                        actions: <Widget>[
+                          TextButton(
+                            child: Text('Aceptar'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
 }
@@ -463,13 +563,13 @@ class _ProductDetails extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Column(
-                    children:const [Text('RECORD#',
+                    children:const [Text('Rec',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('   Change Type',
+                    children:const [Text(' Op ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
@@ -487,26 +587,26 @@ class _ProductDetails extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('   SKU           ',
+                    children:const [Text('  SKU           ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('        SKU2   ',
+                    children:const [Text('       SKU2   ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('         nof   ',
+                    children:const [Text('      nof ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
 
                 Column(
-                    children:const [Text(' Dept  ',
+                    children:const [Text('Dept  ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
@@ -518,19 +618,25 @@ class _ProductDetails extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('  Price',
+                    children:const [Text('Price',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('       Desc                                        ',
+                    children:const [Text('      Desc                                        ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('Cancel  ',
+                    children:const [Text('           IM ',
+                      style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,),]
+                ),
+                Column(
+                    children:const [Text('Cancel ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]

@@ -16,4 +16,5 @@ int g_auditType = 0;
 String g_departmentNumber = "";
 int g_sectionNumber = 0;
 String g_user_rol = "";
+String g_im_password = "";
 

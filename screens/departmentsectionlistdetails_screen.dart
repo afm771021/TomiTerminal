@@ -255,10 +255,14 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                                     print('UndoDelete');
                                     print('actualizo los registros de tomi a la base local');
                                     // actualizo los registros de tomi a la base local
-                                    DBProvider.db.downloadDepartmentSectionSkuToAudit();
+
+                                    DBProvider.db.downloadOneDepartmentSectionSkuToAudit(departmentSectionList[index].rec);
+
                                     // Verificar si el parametro es menor al valor del producto ó si el estatus es cancelado (por el auditor)
                                     int? amount = await DBProvider.db.alert_Higher_Amount();
                                     print('verifica si el valor ${departmentSectionList[index].pzas * departmentSectionList[index].sale_Price} es < que la alerta: ${amount}');
+                                    print('Estatus del registro: ${departmentSectionList[index].audit_Status}');
+
                                     if ((departmentSectionList[index].pzas * departmentSectionList[index].sale_Price) < amount! || departmentSectionList[index].audit_Status == 5 )
                                     {
                                       departmentSectionList[index].audit_Action = 2;
@@ -267,6 +271,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                                       departmentSectionList[index].sent = 0;
 
                                       var tipoerror = await UndoDelete(departmentSectionList[index]);
+                                      print('hizo el undo');
                                       departmentSectionList[index].audit_Action = 0;
                                       departmentSectionList[index].audit_Status = 2;
                                       departmentSectionList[index].audit_Reason_Code = 0;
@@ -442,7 +447,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                                       ),
 
                                       Column(
-                                        children: [Text('${departmentSectionList[index].audit_New_Quantity.round()} REC: ${departmentSectionList[index].rec}',
+                                        children: [Text('${departmentSectionList[index].audit_New_Quantity.round()} REC: ${departmentSectionList[index].rec.round()} ST: ${departmentSectionList[index].audit_Status.round()} AC: ${departmentSectionList[index].audit_Action.round()} send:${departmentSectionList[index].sent.round()}',
                                           style: TextStyle(fontSize: 10, color: Colors.black, fontWeight: FontWeight.bold,),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,),]
@@ -899,8 +904,8 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
     }
 
     print('sendJobDetail : Count Records not sended audit_Action: ${jAuditSkuVariationDetailsTmp.length}');
-    for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
-        print(jAuditSkuVariationDetails[i].rec);
+    for (i = 0; i < jAuditSkuVariationDetailsTmp.length; i++) {
+        print(jAuditSkuVariationDetailsTmp[i].rec);
     }
 
     try {

@@ -372,7 +372,7 @@ class DBProvider{
     } on DatabaseException
     catch(e) {
       //log(e.toString());
-      print(e);
+      print('Registro ya existe, actualizar :${jda.job_Details_Id}');
        updateJobDetailAudit(jda);
     }
 
@@ -554,11 +554,29 @@ DEPARTMENTS
                 depId
  */
 
+  Future<void> downloadOneDepartmentSectionSkuToAudit(double rec) async {
+    //GetAuditDepartmentSectionSkuListAsync(int sectionId, string departmentId, int customerId,
+    //             int storeId, DateTime stockDate, string user)
+    var uri = '${Preferences.servicesURL}/api/Audit/GetOneAuditDepartmentSectionSkuList/${g_sectionNumber}/${g_departmentNumber}/${g_customerId}/${g_storeId}/${g_stockDate}/${rec.round()}';
+    var url = Uri.parse(uri);
+    var response = await http.get(url);
+    print ('downloadOneDepartmentSectionSkuToAudit: ${json.decode(response.body)}');
+    final List parsedList = json.decode(response.body);
+    List<jobAuditSkuVariationDept> list = parsedList.map((e) => jobAuditSkuVariationDept.fromTOMIDBJson(e)).toList();
+
+    for(var i=0;i<list.length;i++){
+      nuevoJobAuditSkuVariationDept(list[i]);
+      //print('Lista: ${i}');
+      //print('Lista: $list[i]');
+    }
+  }
+
   Future<void> downloadDepartmentSectionSkuToAudit() async {
     //GetAuditDepartmentSectionSkuListAsync(int sectionId, string departmentId, int customerId,
     //             int storeId, DateTime stockDate, string user)
     var uri = '${Preferences.servicesURL}/api/Audit/GetAuditDepartmentSectionSkuList/${g_sectionNumber}/${g_departmentNumber}/${g_customerId}/${g_storeId}/${g_stockDate}/${g_user}';
     var url = Uri.parse(uri);
+    print ('url: ${url}');
     var response = await http.get(url);
     print (json.decode(response.body));
     final List parsedList = json.decode(response.body);
@@ -722,6 +740,8 @@ DEPARTMENTS
 
   Future<int?> downloadInventoryManager() async{
     final db = await database;
+    await db?.delete('IM_AUDIT');
+
     int? i = 0;
     var uri = '${Preferences.servicesURL}/api/User/GetInventoryManager/${g_inventorykey}';
     var url = Uri.parse(uri);
@@ -731,8 +751,9 @@ DEPARTMENTS
       var loginResponseBody = (jsonDecode(response.body));
        // print('downloadInventoryManager: ${response.body}');
       if (loginResponseBody['success']) {
+        g_im_password = loginResponseBody['password'];
+        print('contraseña IM: ${g_im_password}');
         i = await nuevoInventoryManager(double.parse(loginResponseBody['userId'].toString()).round(), loginResponseBody['password']);
-
       }
     }
     return i;
@@ -762,6 +783,7 @@ DEPARTMENTS
     return res;
   }
 
+
     Future<int> downloadAlerts() async{
     final db = await database;
     await db?.delete('ALERT_PARAMETER');
@@ -780,7 +802,7 @@ DEPARTMENTS
     return i;
   }
 
-  Future<int> AuditProcesOneChange(jobDetailAudit jobDetails, int action) async{
+  Future<int> AuditProcesOneChange(jobDetailAudit jobDetails, int action, int sourceAction) async{
 
     var tipoerror = 0;
     var url = Uri.parse('${Preferences.servicesURL}/api/Audit/AuditMassChange'); // IOS
@@ -795,6 +817,7 @@ DEPARTMENTS
         'stockDate' : g_stockDate.toString(),
         'operation' : 1,
         'action': action,
+        'sourceAction' : sourceAction,
         'jobDetailsIds' : jobDetailsAudit
       };
       print(' params:${json.encode(params)}');
