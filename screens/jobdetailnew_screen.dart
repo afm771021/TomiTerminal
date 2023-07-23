@@ -28,7 +28,7 @@ class _JobDetailsNewScreenState extends State<JobDetailsNewScreen> {
                                      code: '',
                                      sale_Price: 0,
                                      quantity: 0,
-                                     captured_date_time: DateTime.now() ,
+                                     captured_date_time: '' ,
                                      department_Id: '99999',
                                      nof: 0,
                                      sku: '99999',

@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../models/jobAuditSkuVariationDept_model.dart';
 import '../models/jobDetailAudit_model.dart';
 import '../providers/db_provider.dart';
 import '../providers/job_details_list_provider.dart';
 import '../share_preferences/preferences.dart';
 import '../util/globalvariables.dart';
 import '../widgets/tomiterminal_menu.dart';
+import 'package:cryptography/cryptography.dart';
 
 class AuditorListDetailsScreen extends StatefulWidget {
   const AuditorListDetailsScreen({Key? key}) : super(key: key);
@@ -124,7 +124,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                   children: [
                                                     Text(
                                                       '${jobDetails[index].audit_Action == 5 ||
-                                                          jobDetails[index].audit_Action == 2 ? 'UPDATE' : jobDetails[index].audit_Action == 3 ? ' ADD' : ' DELETE'}', maxLines: 1,
+                                                          jobDetails[index].audit_Action == 2 ? 'UPD' : jobDetails[index].audit_Action == 3 ? ' ADD' : ' DEL'}', maxLines: 1,
                                                       overflow: TextOverflow.ellipsis,)
                                                   ],
                                                 ),
@@ -180,7 +180,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                 Column(
                                                   children: [
                                                     Text(
-                                                      'DESC: AAC:${jobDetails[index].audit_Action.round()} ASTA: ${jobDetails[index].audit_Status.round()} SEN:${jobDetails[index].sent.round()} SAC:${jobDetails[index].source_Action.round()}', maxLines: 1, overflow: TextOverflow.ellipsis,)
+                                                      '${jobDetails[index].description}', maxLines: 1, overflow: TextOverflow.ellipsis,) //AAC:${jobDetails[index].audit_Action.round()} ASTA: ${jobDetails[index].audit_Status.round()} SEN:${jobDetails[index].sent.round()} SAC:${jobDetails[index].source_Action.round()}
                                                   ],
                                                 ),
                                                 Column(
@@ -201,9 +201,13 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                         iconSize: 40,
                                                         onPressed: () async {
                                                           print('IM:');
+
                                                           //${jobDetails[index].job_Details_Id}');
                                                           // jobDetails[index].audit_Action = 8;
-                                                          _mostrarVentanaEmergente(context, jobDetails[index]);
+                                                          var bytes = utf8.encode('Migoca0502*');
+                                                          String hashGuardado= 'AQAAAAEAACcQAAAAECMF2zZADyUOBZJ8naOndMBv3Yo7b/aBFfn4w30c+t2FXQaF61TE+/U1Ujl/kOqWGw==';
+
+                                                          //_mostrarVentanaEmergente(context, jobDetails[index]);
 
                                                           //int ProcesOk = await DBProvider.db.AuditProcesOneChange(jobDetails[index], 1, 8);
                                                           //if (ProcesOk == 0) {

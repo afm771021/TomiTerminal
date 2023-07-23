@@ -49,7 +49,7 @@ class jobDetailAudit {
   double sale_Price;
   double quantity;
   double operation;
-  DateTime captured_date_time;
+  String captured_date_time;
   String department_Id;
   int nof;
   String sku;
@@ -74,7 +74,7 @@ class jobDetailAudit {
     code: json["CODE"],
     sale_Price: json["SALE_PRICE"],
     quantity: json["QUANTITY"],
-    captured_date_time: DateTime.parse(json["CAPTURED_DATE_TIME"]),
+    captured_date_time: json["CAPTURED_DATE_TIME"],
     department_Id: json["DEPARTMENT_ID"],
     nof: json["NOF"],
     sku: json["SKU"],
@@ -101,7 +101,7 @@ class jobDetailAudit {
     code: json["code"],
     sale_Price: json["salePrice"],
     quantity: json["quantity"],
-    captured_date_time: DateTime.parse(json["capturedDateTime"] ?? DateTime.now()) ,
+    captured_date_time: json["capturedDateTime"] ?? "" ,
     department_Id: json["departmentId"],
     nof: (json["nof"])?1:0,
     sku: json["sku"] ?? "",
@@ -128,7 +128,7 @@ class jobDetailAudit {
     "code": code,
     "sale_price": sale_Price,
     "quantity": quantity,
-    "captured_date_time": "${captured_date_time.year.toString().padLeft(4, '0')}-${captured_date_time.month.toString().padLeft(2, '0')}-${captured_date_time.day.toString().padLeft(2, '0')} ${captured_date_time.hour.toString().padLeft(2,'0')}:${captured_date_time.minute.toString().padLeft(2,'0')}:${captured_date_time.second.toString().padLeft(2,'0')}",
+    "captured_date_time": captured_date_time,
     "department_Id": department_Id,
     "nof":nof,
     "sku":sku,

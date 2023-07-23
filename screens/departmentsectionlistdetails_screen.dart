@@ -90,7 +90,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                   Row(
                     children:[
                       Text(
-                        'Department $g_departmentNumber - Section $g_sectionNumber     |    Progress ${porcentajeEditados}%    |    ${horas.toString().padLeft(2, '0')}:${minutos.toString().padLeft(2, '0')}:${segundos.toString().padLeft(2, '0')}',
+                        'Department $g_departmentNumber - Section $g_sectionNumber     |    Progress ${porcentajeEditados.toStringAsFixed(1)}%    |    ${horas.toString().padLeft(2, '0')}:${minutos.toString().padLeft(2, '0')}:${segundos.toString().padLeft(2, '0')}',
                         style: TextStyle(fontSize: 25),
                       ),
                       const SizedBox(width: 50),
@@ -519,7 +519,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                                       ),
 
                                       Column(
-                                        children: [Text('${departmentSectionList[index].audit_New_Quantity.round()} REC: ${departmentSectionList[index].rec.round()} ST: ${departmentSectionList[index].audit_Status.round()} AC: ${departmentSectionList[index].audit_Action.round()} send:${departmentSectionList[index].sent.round()}',
+                                        children: [Text('${departmentSectionList[index].audit_New_Quantity.round()}', // REC: ${departmentSectionList[index].rec.round()} ST: ${departmentSectionList[index].audit_Status.round()} AC: ${departmentSectionList[index].audit_Action.round()} send:${departmentSectionList[index].sent.round()}',
                                           style: TextStyle(fontSize: 10, color: Colors.black, fontWeight: FontWeight.bold,),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,),]
@@ -560,6 +560,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                                       IconButton(
                                           iconSize: 40,
                                           onPressed: () {
+
                                             final route = MaterialPageRoute(builder: (context) =>
                                                 DepartmentSectionEditScreen(jAuditSkuVariationDept: departmentSectionList[index]));
                                             Navigator.pushReplacement(context, route);
@@ -623,6 +624,15 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                   ],
                 ),
                 ),
+                const SizedBox(width: 200,
+                  height: 50,
+                  child: Center(
+                    child: Text(
+                      '',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
                 if ( isLoading )
                   Positioned(
                       bottom: 40,
@@ -636,6 +646,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
 
       ),
       floatingActionButton: FloatingActionButton(
+        mini: true,
         child: const Icon(Icons.add, size: 40,),
         onPressed: () {
           final route = MaterialPageRoute(
@@ -645,7 +656,6 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
       ),
     );
   }
-
 
   Future<int> UndoDelete(jobAuditSkuVariationDept jAuditSkuVariationDetailsRecord) async {
     var tipoerror = 0;
@@ -1015,10 +1025,7 @@ class _HeaderScreen extends StatelessWidget {
                 ),
        );
   }
-
-
 }
-
 
 class _ProductDetails extends StatelessWidget {
   _ProductDetails({
