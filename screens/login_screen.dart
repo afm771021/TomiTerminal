@@ -128,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           )
                       ),
                       const SizedBox(height: 50,),
-                      const Center(child: Text ('(Ver. 1.0.4)', style: TextStyle(fontSize: 10),)),
+                      const Center(child: Text ('(Ver. 1.0.6)', style: TextStyle(fontSize: 10),)),
                     ],
                   ),
                    if ( isLoading )
@@ -190,7 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> onSubmit(String name, String inventorykey) async {
-    //print('onSubmit:');
+    print('onSubmit:');
     try {
       var url = Uri.parse('${Preferences.servicesURL}/api/Audit/auditauthenticate');
       //print('url: ${url}');
@@ -207,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (respuesta.statusCode == 200) {
         var loginResponseBody = (jsonDecode(respuesta.body));
-        //print('statusCode: ${respuesta.body}');
+        print('statusCode: ${respuesta.body}');
         if (!loginResponseBody['success']) {
           showDialog(
               barrierDismissible: true,

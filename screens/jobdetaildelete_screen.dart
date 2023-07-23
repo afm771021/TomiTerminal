@@ -140,16 +140,8 @@ class DeleteForm extends StatelessWidget {
                     labelText: 'Reason Delete',
                   ),
 
-                  items: <String>['Preconteo Tienda erróneo.',
-                    'Conteo Inicial Accurats erróneo',
-                    'Sku no corresponde.',
-                    'Caja en altillo sin SKU (QR)',
-                    'Caja en Altillos sin cantidad o cantidad errónea.',
-                    'Cantidad no corresponde.',
-                    'SKU no existe, se cambió por similar.',
-                    'Error en Unidad de medida.',
-                    'corrección por Tablet, errónea en cantidad',
-                    'corrección por Tablet, errónea en Sku.'
+                  items: <String>['Error preparación tienda',
+                    'Error conteo proveedor'
                   ].map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
@@ -160,7 +152,14 @@ class DeleteForm extends StatelessWidget {
                     );
                   }).toList(),
                   onChanged: (String? value) {
-                    if (value == 'Preconteo Tienda erróneo.'){
+                    if (value == 'Error preparación tienda'){
+                      jdetailaudit.audit_Reason_Code = 1.0;
+                    }
+                    else if (value == 'Error conteo proveedor'){
+                      jdetailaudit.audit_Reason_Code = 2.0;
+                    }
+
+                    /*if (value == 'Preconteo Tienda erróneo.'){
                       jdetailaudit.audit_Reason_Code = 1;
                     }
                     else if (value == 'Conteo Inicial Accurats erróneo'){
@@ -189,7 +188,7 @@ class DeleteForm extends StatelessWidget {
                     }
                     else if (value == 'corrección por Tablet, errónea en Sku.'){
                       jdetailaudit.audit_Reason_Code = 10;
-                    }
+                    }*/
                   },
                 ),
               ],

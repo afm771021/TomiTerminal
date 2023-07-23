@@ -110,7 +110,9 @@ class _DrawerHeader extends StatelessWidget {
           image: AssetImage('assets/tomi_logo_white.png'),
         )
         ),
-        child: Container(),
+        child: Container(
+          child: Text('     User: ${g_user}    Rol: ${g_user_rol}'),
+        ),
     );
   }
 }

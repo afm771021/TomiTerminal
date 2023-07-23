@@ -8,6 +8,7 @@ import '../models/jobAuditSkuVariationDept_model.dart';
 import '../providers/db_provider.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:device_info/device_info.dart';
 
 import '../share_preferences/preferences.dart';
 
@@ -75,7 +76,9 @@ class _DepartmentSectionNewScreenState extends State<DepartmentSectionNewScreen>
       audit_New_Quantity: 0,
       audit_Action: 3,
       audit_Reason_Code: 0,
-      sent: 0);
+      sent: 0,
+      captured_Date_Time: DateTime.now().toString(),
+      terminal: '');
 
   @override
   Widget build(BuildContext context) {
@@ -171,8 +174,16 @@ class _DepartmentSectionNewScreenState extends State<DepartmentSectionNewScreen>
                 });
           }
           else {
-            writeToLog('Add Record Code: ${jAuditSkuVariationDept.code} Add Record pzas: ${jAuditSkuVariationDept.pzas}');
-
+            //writeToLog('Add Record Code: ${jAuditSkuVariationDept.code} Add Record pzas: ${jAuditSkuVariationDept.pzas}');
+            try
+            {
+              DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+              AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+              jAuditSkuVariationDept.terminal = androidInfo.model.substring(0,10);
+            }
+            catch (e) {
+              jAuditSkuVariationDept.terminal = 'NoNameDev';
+            }
             //var tipoerror = await sendAddJobDetail(jAuditSkuVariationDept);
 
             DBProvider.db.nuevoJobAuditSkuVariationDept(jAuditSkuVariationDept);
@@ -327,16 +338,8 @@ class AddForm extends StatelessWidget {
                     labelText: 'Reason Change',
                   ),
 
-                  items: <String>['Preconteo Tienda erróneo.',
-                    'Conteo Inicial Accurats erróneo',
-                    'Sku no corresponde.',
-                    'Caja en altillo sin SKU (QR)',
-                    'Caja en Altillos sin cantidad o cantidad errónea.',
-                    'Cantidad no corresponde.',
-                    'SKU no existe, se cambió por similar.',
-                    'Error en Unidad de medida.',
-                    'corrección por Tablet, errónea en cantidad',
-                    'corrección por Tablet, errónea en Sku.'
+                  items: <String>['Error preparación tienda',
+                    'Error conteo proveedor'
                   ].map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
@@ -347,7 +350,14 @@ class AddForm extends StatelessWidget {
                     );
                   }).toList(),
                   onChanged: (String? value) {
-                    if (value == 'Preconteo Tienda erróneo.'){
+                    if (value == 'Error preparación tienda'){
+                      jAuditSkuVariationDept.audit_Reason_Code = 1.0;
+                    }
+                    else if (value == 'Error conteo proveedor'){
+                      jAuditSkuVariationDept.audit_Reason_Code = 2.0;
+                    }
+
+                    /*if (value == 'Preconteo Tienda erróneo.'){
                       jAuditSkuVariationDept.audit_Reason_Code = 1.0;
                     }
                     else if (value == 'Conteo Inicial Accurats erróneo'){
@@ -376,7 +386,7 @@ class AddForm extends StatelessWidget {
                     }
                     else if (value == 'corrección por Tablet, errónea en Sku.'){
                       jAuditSkuVariationDept.audit_Reason_Code = 10.0;
-                    }
+                    }*/
                   },
                 )
               ],

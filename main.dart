@@ -8,8 +8,10 @@ import 'package:tomi_terminal_audit2/providers/tag_list_provider.dart';
 import 'package:tomi_terminal_audit2/router/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tomi_terminal_audit2/screens/departmentsectionlistdetails_screen.dart';
 import 'package:tomi_terminal_audit2/share_preferences/preferences.dart';
 
+import 'models/contador_model.dart';
 import 'screens/screens.dart';
 
 void main() async {
@@ -32,6 +34,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DepartmentSectionListProvider()),
         ChangeNotifierProvider(create: (_) => JobIndicatorsProvider()),
         ChangeNotifierProvider(create: (_) => DepartmentListProvider()),
+        ChangeNotifierProvider(create: (context) => ContadorModel(),
+                                child: const MaterialApp(
+                                        home: DepartmentSectionListDetailsScreen(),
+                                        ),
+                              )
       ],
       child: MaterialApp(
           debugShowCheckedModeBanner: false,

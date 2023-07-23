@@ -33,6 +33,8 @@ class jobDetailAudit {
     required this.audit_New_Quantity,
     required this.audit_Action,
     required this.audit_Reason_Code,
+    required this.sent,
+    required this.source_Action,
   });
 
   double customer_Id;
@@ -57,6 +59,8 @@ class jobDetailAudit {
   double audit_New_Quantity;
   double audit_Action;
   double audit_Reason_Code;
+  double sent;
+  double source_Action;
 
   factory jobDetailAudit.fromJson(Map<String, dynamic> json) => jobDetailAudit(
     customer_Id: json["CUSTOMER_ID"].toDouble(),
@@ -81,6 +85,8 @@ class jobDetailAudit {
     audit_New_Quantity: (json["AUDIT_NEW_QUANTITY"]==null)?0:json["AUDIT_NEW_QUANTITY"],
     audit_Action: (json["AUDIT_ACTION"])==null?0:json["AUDIT_ACTION"].toDouble(),
     audit_Reason_Code: (json["AUDIT_REASON_CODE"])==null?0:json["AUDIT_REASON_CODE"].toDouble(),
+    sent: json["SENT"].toDouble(),
+    source_Action: json["SOURCE_ACTION"].toDouble(),
   );
 
   factory jobDetailAudit.fromTomiDBJson(Map<String, dynamic> json) => jobDetailAudit(
@@ -106,6 +112,8 @@ class jobDetailAudit {
     audit_New_Quantity: json["auditNewQuantity"] ?? 0,
     audit_Action: json["auditAction"] ?? 0,
     audit_Reason_Code: json["auditReasonCode"] ?? 0,
+    sent: json["sent"] ?? 0,
+    source_Action: json["SOURCE_ACTION"] ?? 0,
   );
 
   Map<String, dynamic> toJson() => {
@@ -131,5 +139,7 @@ class jobDetailAudit {
     "audit_New_Quantity": audit_New_Quantity,
     "audit_Action": audit_Action,
     "audit_Reason_Code": audit_Reason_Code,
+    "sent": sent,
+    "source_Action": source_Action,
   };
 }

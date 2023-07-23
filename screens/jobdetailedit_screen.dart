@@ -259,16 +259,8 @@ class _EditFormState extends State<EditForm> {
                     labelText: 'Reason Change',
                   ),
 
-                items: <String>['Preconteo Tienda erróneo.',
-                                'Conteo Inicial Accurats erróneo',
-                                'Sku no corresponde.',
-                                'Caja en altillo sin SKU (QR)',
-                                'Caja en Altillos sin cantidad o cantidad errónea.',
-                                'Cantidad no corresponde.',
-                                'SKU no existe, se cambió por similar.',
-                                'Error en Unidad de medida.',
-                                'corrección por Tablet, errónea en cantidad',
-                                'corrección por Tablet, errónea en Sku.'
+                items: <String>['Error preparación tienda',
+                  'Error conteo proveedor'
                   ].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -279,7 +271,14 @@ class _EditFormState extends State<EditForm> {
                   );
                 }).toList(),
                 onChanged: (String? value) {
-                   if (value == 'Preconteo Tienda erróneo.'){
+                  if (value == 'Error preparación tienda'){
+                    widget.jdetailaudit.audit_Reason_Code = 1;
+                  }
+                  else if (value == 'Error conteo proveedor'){
+                    widget.jdetailaudit.audit_Reason_Code = 2;
+                  }
+
+                   /*if (value == 'Preconteo Tienda erróneo.'){
                      widget.jdetailaudit.audit_Reason_Code = 1;
                    }
                    else if (value == 'Conteo Inicial Accurats erróneo'){
@@ -308,7 +307,7 @@ class _EditFormState extends State<EditForm> {
                    }
                    else if (value == 'corrección por Tablet, errónea en Sku.'){
                      widget.jdetailaudit.audit_Reason_Code = 10;
-                   }
+                   }*/
                 },
               ),
             ],

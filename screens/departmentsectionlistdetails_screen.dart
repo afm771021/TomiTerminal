@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:tomi_terminal_audit2/screens/departmentlist_screen.dart';
 import 'package:tomi_terminal_audit2/screens/departmentsearch_screen.dart';
 import 'package:http/http.dart' as http;
+import '../models/contador_model.dart';
 import '../models/jobAuditSkuVariationDept_model.dart';
 import '../providers/db_provider.dart';
 import '../providers/departmentsection_details_list_provider.dart';
@@ -64,21 +66,50 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
     final departmentSectionListProvider = Provider.of<DepartmentSectionListProvider>(context, listen: true);
     departmentSectionListProvider.getJobAuditSkuVariationDept(g_customerId, g_storeId, g_stockDate, g_departmentNumber, g_sectionNumber);
     final departmentSectionList = departmentSectionListProvider.jobAuditSkuVariationDepts;
+
     int contador = 0;
     String sku_inicial = "";
     bool hideinfo = false;
 
+    int totalObjetos = departmentSectionList.length;
+    int objetosEditados = departmentSectionList.where((objeto) => objeto.audit_Action > 0).length;
+    double porcentajeEditados = (objetosEditados / totalObjetos) * 100;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Department $g_departmentNumber - Section $g_sectionNumber'),
+        title:  Center(
+          child: Consumer<ContadorModel>(
+            builder: (context, contador, _) {
+              int horas = contador.segundosRestantes ~/ 3600;
+              int minutos = (contador.segundosRestantes % 3600) ~/ 60;
+              int segundos = contador.segundosRestantes % 60;
+
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children:[
+                      Text(
+                        'Department $g_departmentNumber - Section $g_sectionNumber     |    Progress ${porcentajeEditados}%    |    ${horas.toString().padLeft(2, '0')}:${minutos.toString().padLeft(2, '0')}:${segundos.toString().padLeft(2, '0')}',
+                        style: TextStyle(fontSize: 25),
+                      ),
+                      const SizedBox(width: 50),
+                      ElevatedButton(
+                        onPressed: contador.segundosRestantes == 0
+                            ? () {
+                          contador.reiniciarContador();
+                        } // Si el contador es cero, deshabilitar el botón
+                            : null,
+                        child: Text('Reiniciar Contador',style: TextStyle(fontSize: 10),),
+                      ),
+                    ]
+                  )
+                ],
+              );
+            },
+          ),
+        ),//Text('Department $g_departmentNumber - Section $g_sectionNumber'),
         actions: [
-          /*IconButton(
-            iconSize: 40,
-            onPressed: !isLoading ? () async {
-              validaDepartments(departmentSectionList);
-            }:null,
-            icon: const Icon(Icons.cloud_done),
-          ),*/
           IconButton(
             iconSize: 40,
             onPressed: !isLoading ? () async {
@@ -104,39 +135,46 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                               Navigator.pop(context);
                               var pendings = countDepartmentspending(departmentSectionList);
                               print(pendings);
-                              showDialog(
-                                  barrierDismissible: false,
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      elevation: 5,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadiusDirectional.circular(10)),
-                                      title: const Text('Alert'),
-                                      content: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children:  [
-                                          Text('$pendings record(s) missing to process, continue ?'),
-                                          SizedBox(height: 10),
-                                        ],
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                            onPressed: () async {
-                                              Navigator.pop(context);
-                                              validaDepartments(departmentSectionList);
-                                            },
-                                            child: const Text('OK')),
-                                        TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
+                              if (pendings > 0) {
+                                showDialog(
+                                    barrierDismissible: false,
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        elevation: 5,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadiusDirectional
+                                                .circular(10)),
+                                        title: const Text('Alert'),
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                                '$pendings record(s) missing to process, continue ?'),
+                                            SizedBox(height: 10),
+                                          ],
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                              onPressed: () async {
+                                                Navigator.pop(context);
+                                                validaDepartments(departmentSectionList);
+                                              },
+                                              child: const Text('OK')),
+                                          TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
                                               },
 
-                                    child: const
-                                     Text('Cancel'))
-                                      ],
-                                    );
-                                  });
+                                              child: const
+                                              Text('Cancel'))
+                                        ],
+                                      );
+                                    });
+                              }
+                              else{
+                                validaDepartments(departmentSectionList);
+                              }
                             },
                             child: const Text('OK')),
                         TextButton(
@@ -215,7 +253,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
 
                                 },
                                 onLongPress: () async {
-                                  writeToLog('Undo action Record Code: ${departmentSectionList[index].code} last action: ${departmentSectionList[index].audit_Action} last new quantity: ${departmentSectionList[index].audit_New_Quantity} last reason code: ${departmentSectionList[index].audit_Reason_Code}');
+                                  print('Undo action Record Code: ${departmentSectionList[index].code} last action: ${departmentSectionList[index].audit_Action} last new quantity: ${departmentSectionList[index].audit_New_Quantity} last reason code: ${departmentSectionList[index].audit_Reason_Code}');
 
                                   /*if (departmentSectionList[index].audit_Action != 5) {
                                     departmentSectionList[index].audit_New_Quantity = 0.0;
@@ -226,6 +264,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                                     DBProvider.db.updateJobSkuVariationDeptAudit(departmentSectionList[index]);*/
 
                                   if (departmentSectionList[index].audit_Action == 1) {
+                                    print('deshacer: ${departmentSectionList[index].audit_Action}');
                                     departmentSectionList[index].audit_New_Quantity = 0.0;
                                     departmentSectionList[index].audit_Action = 0;
                                     departmentSectionList[index].audit_Status = 2;
@@ -233,12 +272,12 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                                     departmentSectionList[index].sent = 0;
                                     DBProvider.db.updateJobSkuVariationDeptAudit(departmentSectionList[index]);
                                   }// UndoUpdate
-                                  else if (departmentSectionList[index].audit_Action == 2) {
+                                  else if (departmentSectionList[index].audit_Action == 2 ) {
                                     print('UndoUpdate');
-                                    departmentSectionList[index].audit_New_Quantity = departmentSectionList[index].pzas;
+                                    /*departmentSectionList[index].audit_New_Quantity = departmentSectionList[index].pzas;
                                     departmentSectionList[index].audit_Action = 2;
                                     departmentSectionList[index].audit_Status = 3;
-                                    departmentSectionList[index].audit_Reason_Code = 0;
+                                    departmentSectionList[index].audit_Reason_Code = 0;*/
                                     departmentSectionList[index].sent = 0;
 
                                     var tipoerror = await UndoUpdate(departmentSectionList[index]);
@@ -251,17 +290,50 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                                       DBProvider.db.updateJobSkuVariationDeptAudit(departmentSectionList[index]);
                                     }
                                   }
-                                  else if (departmentSectionList[index].audit_Action == 4) {
+                                  else if (departmentSectionList[index].audit_Status == 3 && departmentSectionList[index].audit_Action == 5){
+                                    print('UndoUpdate cancel by auditor - Status: ');
+                                    var status = await DBProvider.db.downloadOneDepartmentSectionSkuToAudit_CancelAuditor(departmentSectionList[index].rec);
+                                    print('await ${departmentSectionList[index].audit_Status} - ${status}');
+                                    await Future.delayed(const Duration(seconds: 1));
+
+                                    if(status == 5){
+                                      departmentSectionList[index].audit_New_Quantity = 0.0;
+                                      departmentSectionList[index].audit_Action = 0;
+                                      departmentSectionList[index].audit_Status = 2;
+                                      departmentSectionList[index].audit_Reason_Code = 0;
+                                      DBProvider.db.updateJobSkuVariationDeptAudit(departmentSectionList[index]);
+                                    }
+
+                                  }
+
+                                  if (departmentSectionList[index].audit_Status == 5 && departmentSectionList[index].audit_Action == 5){
+                                    print('UndoUpdate cancel by auditor');
+
+                                    departmentSectionList[index].sent = 0;
+
+                                    var tipoerror = await UndoUpdate(departmentSectionList[index]);
+                                    departmentSectionList[index].audit_New_Quantity = 0.0;
+                                    departmentSectionList[index].audit_Action = 0;
+                                    departmentSectionList[index].audit_Status = 2;
+                                    departmentSectionList[index].audit_Reason_Code = 0;
+
+                                    if(tipoerror == 0) {
+                                      DBProvider.db.updateJobSkuVariationDeptAudit(departmentSectionList[index]);
+                                    }
+                                  }
+                                  else if (departmentSectionList[index].audit_Action == 4)
+                                  {
                                     print('UndoDelete');
                                     print('actualizo los registros de tomi a la base local');
-                                    // actualizo los registros de tomi a la base local
 
-                                    DBProvider.db.downloadOneDepartmentSectionSkuToAudit(departmentSectionList[index].rec);
+                                    // actualizo los registros de tomi a la base local en caso de que sea un registro cancelado por
+                                    // un auditor
+                                    DBProvider.db.downloadOneDepartmentSectionSkuToAudit_CancelAuditor(departmentSectionList[index].rec);
 
-                                    // Verificar si el parametro es menor al valor del producto ó si el estatus es cancelado (por el auditor)
-                                    int? amount = await DBProvider.db.alert_Higher_Amount();
-                                    print('verifica si el valor ${departmentSectionList[index].pzas * departmentSectionList[index].sale_Price} es < que la alerta: ${amount}');
-                                    print('Estatus del registro: ${departmentSectionList[index].audit_Status}');
+                                    // // Verificar si el parametro es menor al valor del producto ó si el estatus es cancelado (por el auditor)
+                                     int? amount = await DBProvider.db.alert_Higher_Amount();
+                                     print('verifica si el valor ${departmentSectionList[index].pzas * departmentSectionList[index].sale_Price} es < que la alerta: ${amount}');
+                                     print('Estatus del registro: ${departmentSectionList[index].audit_Status}');
 
                                     if ((departmentSectionList[index].pzas * departmentSectionList[index].sale_Price) < amount! || departmentSectionList[index].audit_Status == 5 )
                                     {
@@ -522,6 +594,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                                               departmentSectionList[index].audit_Action = 1;
                                               departmentSectionList[index].audit_Status = 2;
                                               departmentSectionList[index].audit_Reason_Code = 0;
+                                              print ('Marcar Registro OK');
                                               var tipoerror = await sendOKJobDetail(departmentSectionList[index]);
 
                                               /*if (tipoerror == 0){
@@ -574,7 +647,6 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
   }
 
 
-
   Future<int> UndoDelete(jobAuditSkuVariationDept jAuditSkuVariationDetailsRecord) async {
     var tipoerror = 0;
     var uri = '${Preferences.servicesURL}/api/Audit/UndoDeleteUpdateJobDetailAuditAsync/${g_customerId}/${g_storeId}/${g_stockDate}/${jAuditSkuVariationDetailsRecord.rec.round()}';
@@ -596,73 +668,24 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
   }
 
   Future<int> UndoUpdate(jobAuditSkuVariationDept jAuditSkuVariationDetailsRecord) async {
-
-    //Enviar a la base de TOMI los registros con los cambios auditados
-
-    List<jobAuditSkuVariationDept> jAuditSkuVariationDetails = [];
-    var i = 0;
     var tipoerror = 0;
-    var url = Uri.parse('${Preferences.servicesURL}/api/Audit/GetSkuVariationDetailsAuditAsync'); // IOS
+    var uri = '${Preferences.servicesURL}/api/Audit/UndoUpdateJobDetailAuditAsync/${g_customerId}/${g_storeId}/${g_stockDate}/${jAuditSkuVariationDetailsRecord.rec.round()}';
+    var url = Uri.parse(uri);
+    print(url);
+    var response = await http.get(url);
+    print(response.body);
+    print ('UndoDelete: ${json.decode(response.body)}');
 
-    //final auditorSkuVariationDept = await DBProvider.db.getAuditorSkuVariationDeptAuditedandPendingtosend();
-    //jAuditSkuVariationDetails = [...?auditorSkuVariationDept];
-
-    jAuditSkuVariationDetails.add(jAuditSkuVariationDetailsRecord);
-    //writeToLog('Count Records to UndoUpdate: ${jAuditSkuVariationDetails.length}');
-    print('Count Records to UndoUpdate: ${jAuditSkuVariationDetails.length}');
-
-    for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
-      jAuditSkuVariationDetails[i].audit_Status = (jAuditSkuVariationDetails[i].audit_Action == 1)?jAuditSkuVariationDetails[i].audit_Status = 4:jAuditSkuVariationDetails[i].audit_Status = 3;
-      print(jAuditSkuVariationDetails[i].toJson());
-      //writeToLog('record: i - Json: ${jAuditSkuVariationDetails[i].toJson().toString()}');
-    }
-
-    try {
-      List jsonTags = jAuditSkuVariationDetails.map((jAuditSkuVariationDetails) => jAuditSkuVariationDetails.toJson()).toList();
-      var params = {
-        'customerId':g_customerId,
-        'storeId': g_storeId,
-        'stockDate' : g_stockDate.toString(),
-        'departmentId' : g_departmentNumber,
-        'sectionId': g_sectionNumber,
-        'closeSection' : 0,
-        'skuVariationAuditModel' : jAuditSkuVariationDetails
-      };
-      print(' url: ${url}');
-      print(' params:${json.encode(params)}');
-      print(' jAuditSkuVariationDetails:${json.encode(jAuditSkuVariationDetails)}');
-      var response = await http.post(
-          url,
-          headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
-          body: json.encode(params)
-      );
-      if (response.statusCode == 200) {
-        Map<String, dynamic> data = jsonDecode(response.body);
-        print(' data .${data}');
-        if (!data["success"]){
-          tipoerror = 2;
-        }
-        else {
-          for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
-            jAuditSkuVariationDetails[i].sent = 0;
-            DBProvider.db.updateJobSkuVariationDeptAudit(
-                jAuditSkuVariationDetails[i]);
-          }
-        }
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = jsonDecode(response.body);
+      print('UndoDelete data .${data}');
+      if (!data["success"]) {
+        tipoerror = 2;
       }
-    } on SocketException catch (e) {
-      //print(' Error en servicio .${e.toString()}');
-      tipoerror = 1;
-    }
-    catch(e){
-      //print(' jAuditSkuVariationDetails already exist in TOMI .${e.toString()}');
-      writeToLog('SendJobDetail: ${e.toString()}');
-      tipoerror = 2;
     }
 
     return tipoerror;
   }
-
 
   Future<int> sendOKJobDetail(jobAuditSkuVariationDept jAuditSkuVariationDetailsRecord) async {
 
@@ -682,7 +705,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
     jAuditSkuVariationDetails.add(jAuditSkuVariationDetailsRecord);
     print('Count Records to send: ${jAuditSkuVariationDetails.length}');
 
-    writeToLog('Count Records to send: ${jAuditSkuVariationDetails.length}');
+    //writeToLog('Count Records to send: ${jAuditSkuVariationDetails.length}');
 
     for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
       jAuditSkuVariationDetails[i].audit_Status = (jAuditSkuVariationDetails[i].audit_Action == 1)?jAuditSkuVariationDetails[i].audit_Status = 4:jAuditSkuVariationDetails[i].audit_Status = 3;
@@ -770,10 +793,11 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
     }
 
     for (i = 0; i < jobSkuVariation.length; i++) {
-       print(jobSkuVariation[i].audit_Action);
+       print('validaDepartments REC: ${jobSkuVariation[i].rec} - ACTION: ${jobSkuVariation[i].audit_Action} '
+           'SENT: ${jobSkuVariation[i].sent}');
     }
 
-     // print('valida departamento');
+     print('valida departamento');
     if (noprocesados > 0) {
       showDialog(
           barrierDismissible: true,
@@ -802,7 +826,6 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
     else {
 
       var tipoerror = await sendJobDetail(jobSkuVariation);
-
 
       if (tipoerror == 0 ){ // && tipoerrornew== 0){
         final route = MaterialPageRoute(
@@ -919,9 +942,9 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
         'closeSection' : 1,
         'skuVariationAuditModel' : jAuditSkuVariationDetailsTmp
       };
-      // print(' url: ${url}');
-      // print(' params:${json.encode(params)}');
-      //print(' jAuditSkuVariationDetails:${json.encode(jAuditSkuVariationDetailsTmp)}');
+       print(' url: ${url}');
+       print(' params:${json.encode(params)}');
+       print(' jAuditSkuVariationDetails:${json.encode(jAuditSkuVariationDetailsTmp)}');
       var response = await http.post(
           url,
           headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
@@ -932,13 +955,18 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
         print(' data1 .${data}');
         if (!data["success"]){
           tipoerror = 2;
+          print(' No success  tipoerror:${tipoerror}');
         }
         else{
+          print('success:');
           for (i = 0; i < jAuditSkuVariationDetailsTmp.length; i++) {
-            if (jAuditSkuVariationDetails[i].sent == 0 && jAuditSkuVariationDetails[i].audit_Action != 3)
+            print('rec: ${ jAuditSkuVariationDetailsTmp[i].rec} sent:${jAuditSkuVariationDetailsTmp[i].sent}'
+                'audit action: ${ jAuditSkuVariationDetailsTmp[i].audit_Action}');
+            if (jAuditSkuVariationDetailsTmp[i].sent == 0 && jAuditSkuVariationDetailsTmp[i].audit_Action != 3)
             {
               jAuditSkuVariationDetailsTmp[i].sent = 1;
               DBProvider.db.updateJobSkuVariationDeptAudit(jAuditSkuVariationDetailsTmp[i]);
+              print('Sent: ${ jAuditSkuVariationDetailsTmp[i].rec} ${jAuditSkuVariationDetailsTmp[i].sent}');
             }
           }
         }
@@ -946,6 +974,8 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
     } on SocketException catch (e) {
       print(' Error en servicio .${e.toString()}');
       tipoerror = 1;
+      final route = MaterialPageRoute(builder: (context) => const DepartmentListScreen());
+      Navigator.pushReplacement(context, route);
     }
     catch(e){
       print(' jAuditSkuVariationDetails already exist in TOMI .${e.toString()}');

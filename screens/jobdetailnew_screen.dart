@@ -38,7 +38,9 @@ class _JobDetailsNewScreenState extends State<JobDetailsNewScreen> {
                                      audit_Status: 2,
                                      audit_New_Quantity: 0,
                                      audit_Action: 3,
-                                     audit_Reason_Code: 0);
+                                     audit_Reason_Code: 0,
+                                     sent: 0,
+                                     source_Action: 0);
 
    /*Future<List<JobDepartment>> loadDepartments () async{
        final departments = await DBProvider.db.getAllDepartments();
@@ -290,16 +292,8 @@ class AddForm extends StatelessWidget {
                     labelText: 'Reason Change',
                   ),
 
-                  items: <String>['Preconteo Tienda erróneo.',
-                    'Conteo Inicial Accurats erróneo',
-                    'Sku no corresponde.',
-                    'Caja en altillo sin SKU (QR)',
-                    'Caja en Altillos sin cantidad o cantidad errónea.',
-                    'Cantidad no corresponde.',
-                    'SKU no existe, se cambió por similar.',
-                    'Error en Unidad de medida.',
-                    'corrección por Tablet, errónea en cantidad',
-                    'corrección por Tablet, errónea en Sku.'
+                  items: <String>['Error preparación tienda',
+                    'Error conteo proveedor'
                   ].map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
@@ -310,7 +304,14 @@ class AddForm extends StatelessWidget {
                     );
                   }).toList(),
                   onChanged: (String? value) {
-                    if (value == 'Preconteo Tienda erróneo.'){
+                    if (value == 'Error preparación tienda'){
+                      jdetailaudit.audit_Reason_Code = 1;
+                    }
+                    else if (value == 'Error conteo proveedor'){
+                      jdetailaudit.audit_Reason_Code = 2;
+                    }
+
+                    /*if (value == 'Preconteo Tienda erróneo.'){
                       jdetailaudit.audit_Reason_Code = 1.0;
                     }
                     else if (value == 'Conteo Inicial Accurats erróneo'){
@@ -339,7 +340,7 @@ class AddForm extends StatelessWidget {
                     }
                     else if (value == 'corrección por Tablet, errónea en Sku.'){
                       jdetailaudit.audit_Reason_Code = 10.0;
-                    }
+                    }*/
                   },
                 )
               ],

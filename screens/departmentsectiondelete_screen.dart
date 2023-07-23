@@ -234,7 +234,8 @@ class DeleteForm extends StatelessWidget {
               children: [
                 _ProductDetails(numrec:jAuditSkuVariationDept.rec.round(),
                     sku: jAuditSkuVariationDept.code,
-                    qty: jAuditSkuVariationDept.pzas.round()),
+                    qty: jAuditSkuVariationDept.pzas.round(),
+                    price: jAuditSkuVariationDept.sale_Price),
                 SizedBox(height: 10,),
                 /*Text('# REC : ${jdetailaudit.job_Details_Id.round()}'),
                 SizedBox(height: 10,),
@@ -260,16 +261,8 @@ class DeleteForm extends StatelessWidget {
                     labelText: 'Reason Delete',
                   ),
 
-                  items: <String>['Preconteo Tienda erróneo.',
-                    'Conteo Inicial Accurats erróneo',
-                    'Sku no corresponde.',
-                    'Caja en altillo sin SKU (QR)',
-                    'Caja en Altillos sin cantidad o cantidad errónea.',
-                    'Cantidad no corresponde.',
-                    'SKU no existe, se cambió por similar.',
-                    'Error en Unidad de medida.',
-                    'corrección por Tablet, errónea en cantidad',
-                    'corrección por Tablet, errónea en Sku.'
+                  items: <String>['Error preparación tienda',
+                    'Error conteo proveedor'
                   ].map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
@@ -280,7 +273,14 @@ class DeleteForm extends StatelessWidget {
                     );
                   }).toList(),
                   onChanged: (String? value) {
-                    if (value == 'Preconteo Tienda erróneo.'){
+                    if (value == 'Error preparación tienda'){
+                      jAuditSkuVariationDept.audit_Reason_Code = 1.0;
+                    }
+                    else if (value == 'Error conteo proveedor'){
+                      jAuditSkuVariationDept.audit_Reason_Code = 2.0;
+                    }
+
+                    /*if (value == 'Preconteo Tienda erróneo.'){
                       jAuditSkuVariationDept.audit_Reason_Code = 1;
                     }
                     else if (value == 'Conteo Inicial Accurats erróneo'){
@@ -309,7 +309,7 @@ class DeleteForm extends StatelessWidget {
                     }
                     else if (value == 'corrección por Tablet, errónea en Sku.'){
                       jAuditSkuVariationDept.audit_Reason_Code = 10;
-                    }
+                    }*/
                   },
                 ),
               ],
@@ -329,12 +329,13 @@ class DeleteForm extends StatelessWidget {
 
 class _ProductDetails extends StatelessWidget {
   _ProductDetails({
-    Key? key, required this.numrec, required this.sku, required this.qty,
+    Key? key, required this.numrec, required this.sku, required this.qty, required this.price,
   }) : super(key: key);
 
   final int numrec;
   final String sku;
   final int qty;
+  final double price;
 
   @override
   Widget build(BuildContext context) {
@@ -358,7 +359,7 @@ class _ProductDetails extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            Text('QTY: $qty',
+            Text('QTY: $qty PRICE: \$$price',
               style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

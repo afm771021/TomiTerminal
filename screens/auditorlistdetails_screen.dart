@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../models/jobAuditSkuVariationDept_model.dart';
 import '../models/jobDetailAudit_model.dart';
 import '../providers/db_provider.dart';
 import '../providers/job_details_list_provider.dart';
@@ -84,7 +85,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                   itemCount: jobDetails.length,
                                   itemBuilder: (context, index) //=> ProductCard()
                                   {
-                                      if (jobDetails[index].audit_Status != 4 && (jobDetails[index].audit_Action == 4 || jobDetails[index].audit_Action == 5)){
+                                      if (jobDetails[index].audit_Status != 4 && jobDetails[index].sent == 0){ //(jobDetails[index].audit_Action == 4 || jobDetails[index].audit_Action == 5)){
                                         //if (jobDetails[index].audit_Action == 4 || jobDetails[index].audit_Action == 5) {
                                         return Card(
                                           color: (jobDetails[index].audit_Action == null || jobDetails[index].audit_Action == 7)
@@ -130,13 +131,13 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                 Column(
                                                   children: [
                                                     Text(
-                                                      ' ${jobDetails[index].audit_New_Quantity}     ', maxLines: 1, overflow: TextOverflow.ellipsis,)
+                                                      ' ${jobDetails[index].audit_New_Quantity.round()}     ', maxLines: 1, overflow: TextOverflow.ellipsis,)
                                                   ],
                                                 ),
                                                 Column(
                                                   children: [
                                                     Text(
-                                                      '${jobDetails[index].tag_Number} ', maxLines: 1, overflow: TextOverflow
+                                                      '${jobDetails[index].tag_Number.round()} ', maxLines: 1, overflow: TextOverflow
                                                         .ellipsis,)
                                                   ],
                                                 ),
@@ -167,7 +168,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                 Column(
                                                   children: [
                                                     Text(
-                                                      '${jobDetails[index].quantity} ', maxLines: 1, overflow: TextOverflow.ellipsis,)
+                                                      '${jobDetails[index].quantity.round()} ', maxLines: 1, overflow: TextOverflow.ellipsis,)
                                                   ],
                                                 ),
                                                 Column(
@@ -179,7 +180,13 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                 Column(
                                                   children: [
                                                     Text(
-                                                      '${jobDetails[index].description} ', maxLines: 1, overflow: TextOverflow.ellipsis,)
+                                                      'DESC: AAC:${jobDetails[index].audit_Action.round()} ASTA: ${jobDetails[index].audit_Status.round()} SEN:${jobDetails[index].sent.round()} SAC:${jobDetails[index].source_Action.round()}', maxLines: 1, overflow: TextOverflow.ellipsis,)
+                                                  ],
+                                                ),
+                                                Column(
+                                                  children: [
+                                                    Text(
+                                                      '${(jobDetails[index].audit_Reason_Code)==1?"T":"P"}', maxLines: 1, overflow: TextOverflow.ellipsis,)
                                                   ],
                                                 ),
                                               ],
@@ -214,11 +221,16 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                     IconButton(
                                                         iconSize: 40,
                                                         onPressed: () async {
-                                                          print('CANCEL:${jobDetails[index].job_Details_Id}');jobDetails[index].audit_Action = 8;
-                                                          int ProcesOk = await DBProvider.db.AuditProcesOneChange(jobDetails[index], 2, 9);
-                                                          if (ProcesOk == 0) {
-                                                            DBProvider.db.updateJobDetailAudit(jobDetails[index]);
-                                                          }
+                                                          print('CANCEL:${jobDetails[index].job_Details_Id}');
+                                                          jobDetails[index].audit_Status = 5;
+                                                          jobDetails[index].audit_Action = 5;
+                                                          jobDetails[index].source_Action = 5;
+
+                                                          DBProvider.db.updateJobDetailAudit(jobDetails[index]);
+
+                                                          int ProcesOk = await DBProvider.db.AuditProcesOneChange(jobDetails[index], 2, 5);
+                                                          print('CancelOK: ${ProcesOk}');
+
                                                         },
                                                         icon: const Icon(Icons.cancel, color: Colors.red,
                                                         )
@@ -241,10 +253,14 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                         onPressed: () async {
                                                           print('PROCESS:${jobDetails[index].job_Details_Id}');
                                                           jobDetails[index].audit_Action = 7;
+                                                          jobDetails[index].source_Action = 9;
+
+                                                          DBProvider.db.updateJobDetailAudit(jobDetails[index]);
+
                                                           int ProcesOk = await DBProvider.db.AuditProcesOneChange(jobDetails[index], 1,9);
-                                                          if (ProcesOk == 0) {
-                                                            DBProvider.db.updateJobDetailAudit(jobDetails[index]);
-                                                          }
+
+                                                          print('ProcesOk: ${ProcesOk}');
+
                                                         },
                                                         icon: const Icon(
                                                           Icons.check_circle_outline, color: Colors.green,
@@ -286,22 +302,45 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
       List<jobDetailAudit> jobDetails) async {
     var i = 0;
     var noprocesados = 0;
-    List<double> jobDetailsAudit = [];
+    List<jobDetailAudit> jobDetailsAudit = [];
 
-    print('validaJobDetail ___________________');
     for (i = 0; i < jobDetails.length; i++) {
-      print('validaJobDetail: Id:${jobDetails[i].job_Details_Id} Action: ${jobDetails[i].audit_Action}');
-      if (jobDetails[i].audit_Status != 4 && (jobDetails[i].audit_Action == 4 || jobDetails[i].audit_Action == 5)){
-        jobDetailsAudit.add(jobDetails[i].job_Details_Id);
+      if (jobDetails[i].source_Action == 0){
+        jobDetails[i].source_Action = 7;
+      }
+      print('validaJobDetail: Id:${jobDetails[i].job_Details_Id} Action: ${jobDetails[i].audit_Action} source_Action:${jobDetails[i].source_Action}');
+
+      if (jobDetails[i].audit_Status != 4 && (jobDetails[i].audit_Action == 4 || jobDetails[i].audit_Action == 5 ||
+          jobDetails[i].audit_Action == 7 || jobDetails[i].audit_Action == 8 || jobDetails[i].audit_Action == 9)
+          && jobDetails[i].sent == 0){
+        jobDetailsAudit.add(jobDetails[i]);
       }
     }
     print('validaJobDetail jobDetails -> : ${jobDetailsAudit}');
 
-    var tipoerror = 0;
+    var error = 0;
+    var iserror = 0;
 
-    tipoerror = await AuditProcess(jobDetailsAudit,1,7);
+    for (i = 0; i < jobDetailsAudit.length; i++) {
+      List<double> jobDetailsAudittmp = [];
+      jobDetailsAudittmp.add(jobDetailsAudit[i].job_Details_Id);
+      print('AuditProcess: ${jobDetailsAudit[i].job_Details_Id} source action: ${jobDetailsAudit[i].source_Action.toInt()}');
 
-    if (tipoerror > 0) {
+      iserror = await AuditProcess(jobDetailsAudittmp,1,jobDetailsAudit[i].source_Action.toInt());
+
+      if (iserror == 0) {
+        jobDetailsAudit[i].sent = 1;
+        DBProvider.db.updateJobDetailAudit(jobDetailsAudit[i]);
+      }
+      else{
+        error = error + iserror;
+      }
+
+    }
+
+    //tipoerror = await AuditProcess(jobDetailsAudit,1,7);
+
+    if (error > 0) {
       showDialog(
           barrierDismissible: true,
           context: context,
@@ -431,7 +470,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
   Future<int> AuditProcess(List<double> jobDetailsAudit, int action, int sourceAction) async{
     var tipoerror = 0;
     var url = Uri.parse('${Preferences.servicesURL}/api/Audit/AuditMassChange'); // IOS
-
+    print (url);
     try {
       var params = {
         'customerId':g_customerId,
@@ -449,6 +488,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
           body: json.encode(params)
       );
       print(jobDetailsAudit);
+      print(response.statusCode);
       if (response.statusCode == 200) {
         Map<String, dynamic> data = jsonDecode(response.body);
         if (!data["success"]){
@@ -456,7 +496,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
         }
       }
     } on SocketException catch (e) {
-      //print(' Error en servicio .${e.toString()}');
+      print(' Error en servicio .${e.toString()}');
       tipoerror = 1;
     }
     catch(e){
@@ -499,10 +539,13 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                 if (_contrasenaIngresada == _contrasena) {
                    print('Contraseña Correcta');
                    jda.audit_Action = 8;
-                   int ProcesOk = await DBProvider.db.AuditProcesOneChange(jda, 1, 8);
-                   if (ProcesOk == 0) {
+                   jda..source_Action = 8;
                    DBProvider.db.updateJobDetailAudit(jda);
-                   }
+
+                   int ProcesOk = await DBProvider.db.AuditProcesOneChange(jda, 1, 8);
+
+                   print('IM ProcessOk: ${ProcesOk}');
+
                   Navigator.of(context).pop();
                 } else {
                   showDialog(
@@ -563,43 +606,43 @@ class _ProductDetails extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Column(
-                    children:const [Text('Rec',
+                    children:const [Text('Rec.',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text(' Op ',
+                    children:const [Text(' Oper. ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('     Qty new',
+                    children:const [Text(' Qty new',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('    Tag       ',
+                    children:const [Text(' Tag   ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('  SKU           ',
+                    children:const [Text('CODE             ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('       SKU2   ',
+                    children:const [Text('SKU      ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('      nof ',
+                    children:const [Text(' nof  ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
@@ -612,7 +655,7 @@ class _ProductDetails extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('Qty Orig',
+                    children:const [Text('Qty ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
@@ -624,25 +667,31 @@ class _ProductDetails extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('      Desc                                        ',
+                    children:const [Text(' Desc                                               ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('           IM ',
+                    children:const [Text(' Reason ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('Cancel ',
+                    children:const [Text('  IM ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('Process',
+                    children:const [Text(' Cancel ',
+                      style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,),]
+                ),
+                Column(
+                    children:const [Text('  Ok',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]

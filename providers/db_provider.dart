@@ -34,7 +34,7 @@ class DBProvider{
 
   Future<Database> initDB() async{
    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-   final path = join( documentsDirectory.path, 'TomiDB0131.db' );
+   final path = join( documentsDirectory.path, 'TomiDB17.db' );
    print ( path );
 
    return await openDatabase(
@@ -86,6 +86,8 @@ class DBProvider{
                       AUDIT_NEW_QUANTITY REAL,
                       AUDIT_ACTION       INTEGER,
                       AUDIT_REASON_CODE  INTEGER,
+                      SENT               INTEGER DEFAULT 0,
+                      SOURCE_ACTION      INTEGER DEFAULT 0,
                       PRIMARY KEY (CUSTOMER_ID, STORE_ID, STOCK_DATE, JOB_DETAILS_ID, TAG_NUMBER)
                   );
       ''');
@@ -146,6 +148,8 @@ class DBProvider{
                 AUDIT_ACTION       INTEGER,
                 AUDIT_REASON_CODE  INTEGER,
                 SENT               INTEGER DEFAULT 0,
+                CAPTURED_DATE_TIME TEXT,
+                TERMINAL           TEXT,
                 PRIMARY KEY (CUSTOMER_ID, STORE_ID, STOCK_DATE, DEPARTMENT_ID, SECTION_ID, REC, CODE)
             );
       ''');
@@ -322,8 +326,6 @@ class DBProvider{
     int? jobSkuVariationRec  = 0;
     final db = await database;
 
-    //print('nuevoJobAuditSkuVariationDept: ${jda.code}');
-
     /*if (jda.rec == 0){
       final maxId = await db?.query('SKU_VARIATION_DEPT_AUDIT', columns: ['MAX(rec)'], where: 'customer_Id = ? and store_Id = ? and stock_Date = ? and department_Id = ? and section_Id = ?',
           whereArgs: [jda.customer_Id, jda.store_Id, jda.stock_Date.toString().substring(0,10), jda.department_Id, jda.section_Id]);
@@ -337,11 +339,15 @@ class DBProvider{
 
     try {
       res = (await db?.insert('SKU_VARIATION_DEPT_AUDIT', jda.toJson()))!;
+      print('nuevoJobAuditSkuVariationDept: REC: ${jda.rec} sent:${jda.sent}');
+
     } on DatabaseException
     catch(e) {
-      //log(e.toString());
-      print('SKU_VARIATION_DEPT_AUDIT update exist: ${jda.rec}');
-      updateJobSkuVariationDeptAudit(jda);
+      print('updateJobSkuVariationDeptAudit: REC: ${jda.rec} sent:${jda.sent}');
+      if (jda.sent == 1) {
+        print('SKU_VARIATION_DEPT_AUDIT update exist: ${jda.rec}');
+        updateJobSkuVariationDeptAudit(jda);
+      }
     }
 
     return res;
@@ -569,6 +575,40 @@ DEPARTMENTS
       //print('Lista: ${i}');
       //print('Lista: $list[i]');
     }
+  }
+
+  Future<double?> downloadOneDepartmentSectionSkuToAudit_CancelAuditor(double rec) async {
+    //GetAuditDepartmentSectionSkuListAsync(int sectionId, string departmentId, int customerId,
+    //             int storeId, DateTime stockDate, string user)
+    var uri = '${Preferences.servicesURL}/api/Audit/GetOneAuditDepartmentSectionSkuList/${g_sectionNumber}/${g_departmentNumber}/${g_customerId}/${g_storeId}/${g_stockDate}/${rec.round()}';
+    var url = Uri.parse(uri);
+    var response = await http.get(url);
+    print ('downloadOneDepartmentSectionSkuToAudit_CancelAuditor: ${json.decode(response.body)}');
+    final List parsedList = json.decode(response.body);
+    List<jobAuditSkuVariationDept> list = parsedList.map((e) => jobAuditSkuVariationDept.fromTOMIDBJson(e)).toList();
+
+    for(var i=0;i<list.length;i++){
+      UpdateJobAuditSkuVariationDept_CancelAuditor(list[i]);
+      return list[i].audit_Status;
+    }
+
+    return 0.0;
+  }
+
+  Future<int?> UpdateJobAuditSkuVariationDept_CancelAuditor(jobAuditSkuVariationDept jda) async{
+    var res = 0;
+    final db = await database;
+
+    print('UpdateJobAuditSkuVariationDept_CancelAuditor: REC: ${jda.rec}');
+
+    try {
+        updateJobSkuVariationDeptAudit(jda);
+    } on DatabaseException
+    catch(e) {
+      //log(e.toString());
+    }
+
+    return res;
   }
 
   Future<void> downloadDepartmentSectionSkuToAudit() async {
@@ -832,6 +872,10 @@ DEPARTMENTS
         //print(' data .${data}');
         if (!data["success"]){
           tipoerror = 2;
+        }
+        else{
+          jobDetails.sent = 1;
+          DBProvider.db.updateJobDetailAudit(jobDetails);
         }
       }
     } on SocketException catch (e) {

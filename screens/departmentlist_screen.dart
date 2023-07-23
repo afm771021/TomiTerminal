@@ -68,7 +68,6 @@ class _DepartmentListScreenState extends State<DepartmentListScreen> {
                     print('g_departmentNumber: ${g_departmentNumber}');
                     print('g_sectionNumber:${g_sectionNumber}');
                   });
-                  print('g_sectionNumber 2:${g_sectionNumber}');
                   DBProvider.db.downloadDepartmentSectionSkuToAudit();
                   Navigator.pushReplacementNamed(context, 'DepartmentSectionListDetails');
                 },
