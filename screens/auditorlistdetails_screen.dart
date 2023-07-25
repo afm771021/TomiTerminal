@@ -11,7 +11,6 @@ import '../providers/job_details_list_provider.dart';
 import '../share_preferences/preferences.dart';
 import '../util/globalvariables.dart';
 import '../widgets/tomiterminal_menu.dart';
-import 'package:cryptography/cryptography.dart';
 
 class AuditorListDetailsScreen extends StatefulWidget {
   const AuditorListDetailsScreen({Key? key}) : super(key: key);
@@ -200,14 +199,12 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                     IconButton(
                                                         iconSize: 40,
                                                         onPressed: () async {
-                                                          print('IM:');
+                                                          //print('IM:');
 
                                                           //${jobDetails[index].job_Details_Id}');
                                                           // jobDetails[index].audit_Action = 8;
-                                                          var bytes = utf8.encode('Migoca0502*');
-                                                          String hashGuardado= 'AQAAAAEAACcQAAAAECMF2zZADyUOBZJ8naOndMBv3Yo7b/aBFfn4w30c+t2FXQaF61TE+/U1Ujl/kOqWGw==';
 
-                                                          //_mostrarVentanaEmergente(context, jobDetails[index]);
+                                                          _mostrarVentanaEmergente(context, jobDetails[index]);
 
                                                           //int ProcesOk = await DBProvider.db.AuditProcesOneChange(jobDetails[index], 1, 8);
                                                           //if (ProcesOk == 0) {
@@ -225,7 +222,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                     IconButton(
                                                         iconSize: 40,
                                                         onPressed: () async {
-                                                          print('CANCEL:${jobDetails[index].job_Details_Id}');
+                                                          //print('CANCEL:${jobDetails[index].job_Details_Id}');
                                                           jobDetails[index].audit_Status = 5;
                                                           jobDetails[index].audit_Action = 5;
                                                           jobDetails[index].source_Action = 5;
@@ -233,7 +230,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                           DBProvider.db.updateJobDetailAudit(jobDetails[index]);
 
                                                           int ProcesOk = await DBProvider.db.AuditProcesOneChange(jobDetails[index], 2, 5);
-                                                          print('CancelOK: ${ProcesOk}');
+                                                          //print('CancelOK: ${ProcesOk}');
 
                                                         },
                                                         icon: const Icon(Icons.cancel, color: Colors.red,
@@ -255,7 +252,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                     child: IconButton(
                                                         iconSize: 40,
                                                         onPressed: () async {
-                                                          print('PROCESS:${jobDetails[index].job_Details_Id}');
+                                                          //print('PROCESS:${jobDetails[index].job_Details_Id}');
                                                           jobDetails[index].audit_Action = 7;
                                                           jobDetails[index].source_Action = 9;
 
@@ -263,7 +260,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
 
                                                           int ProcesOk = await DBProvider.db.AuditProcesOneChange(jobDetails[index], 1,9);
 
-                                                          print('ProcesOk: ${ProcesOk}');
+                                                          //print('ProcesOk: ${ProcesOk}');
 
                                                         },
                                                         icon: const Icon(
@@ -312,7 +309,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
       if (jobDetails[i].source_Action == 0){
         jobDetails[i].source_Action = 7;
       }
-      print('validaJobDetail: Id:${jobDetails[i].job_Details_Id} Action: ${jobDetails[i].audit_Action} source_Action:${jobDetails[i].source_Action}');
+      //print('validaJobDetail: Id:${jobDetails[i].job_Details_Id} Action: ${jobDetails[i].audit_Action} source_Action:${jobDetails[i].source_Action}');
 
       if (jobDetails[i].audit_Status != 4 && (jobDetails[i].audit_Action == 4 || jobDetails[i].audit_Action == 5 ||
           jobDetails[i].audit_Action == 7 || jobDetails[i].audit_Action == 8 || jobDetails[i].audit_Action == 9)
@@ -320,7 +317,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
         jobDetailsAudit.add(jobDetails[i]);
       }
     }
-    print('validaJobDetail jobDetails -> : ${jobDetailsAudit}');
+    //print('validaJobDetail jobDetails -> : ${jobDetailsAudit}');
 
     var error = 0;
     var iserror = 0;
@@ -328,7 +325,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
     for (i = 0; i < jobDetailsAudit.length; i++) {
       List<double> jobDetailsAudittmp = [];
       jobDetailsAudittmp.add(jobDetailsAudit[i].job_Details_Id);
-      print('AuditProcess: ${jobDetailsAudit[i].job_Details_Id} source action: ${jobDetailsAudit[i].source_Action.toInt()}');
+      //print('AuditProcess: ${jobDetailsAudit[i].job_Details_Id} source action: ${jobDetailsAudit[i].source_Action.toInt()}');
 
       iserror = await AuditProcess(jobDetailsAudittmp,1,jobDetailsAudit[i].source_Action.toInt());
 
@@ -474,7 +471,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
   Future<int> AuditProcess(List<double> jobDetailsAudit, int action, int sourceAction) async{
     var tipoerror = 0;
     var url = Uri.parse('${Preferences.servicesURL}/api/Audit/AuditMassChange'); // IOS
-    print (url);
+    //print (url);
     try {
       var params = {
         'customerId':g_customerId,
@@ -483,16 +480,17 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
         'operation' : 1,
         'action': action,
         'sourceAction' : sourceAction,
-        'jobDetailsIds' : jobDetailsAudit
+        'jobDetailsIds' : jobDetailsAudit,
+        'auditorId' : g_user
       };
-      print(' params:${json.encode(params)}');
+      //print(' params:${json.encode(params)}');
       var response = await http.post(
           url,
           headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
           body: json.encode(params)
       );
-      print(jobDetailsAudit);
-      print(response.statusCode);
+      //print(jobDetailsAudit);
+      //print(response.statusCode);
       if (response.statusCode == 200) {
         Map<String, dynamic> data = jsonDecode(response.body);
         if (!data["success"]){
@@ -500,7 +498,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
         }
       }
     } on SocketException catch (e) {
-      print(' Error en servicio .${e.toString()}');
+      //print(' Error en servicio .${e.toString()}');
       tipoerror = 1;
     }
     catch(e){
@@ -538,17 +536,17 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
               child: Text('Aceptar'),
               onPressed: () async {
                 // Compara la contraseña ingresada con el valor de la variable
-                print('_contrasenaIngresada: ${_contrasenaIngresada} _contrasena: ${_contrasena}');
+                //print('_contrasenaIngresada: ${_contrasenaIngresada} _contrasena: ${_contrasena}');
 
                 if (_contrasenaIngresada == _contrasena) {
-                   print('Contraseña Correcta');
+                   //print('Contraseña Correcta');
                    jda.audit_Action = 8;
                    jda..source_Action = 8;
                    DBProvider.db.updateJobDetailAudit(jda);
 
                    int ProcesOk = await DBProvider.db.AuditProcesOneChange(jda, 1, 8);
 
-                   print('IM ProcessOk: ${ProcesOk}');
+                   //print('IM ProcessOk: ${ProcesOk}');
 
                   Navigator.of(context).pop();
                 } else {

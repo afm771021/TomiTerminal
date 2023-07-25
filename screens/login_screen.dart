@@ -128,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           )
                       ),
                       const SizedBox(height: 50,),
-                      const Center(child: Text ('(Ver. 1.0.6)', style: TextStyle(fontSize: 10),)),
+                      const Center(child: Text ('(Ver. 2.3.3)', style: TextStyle(fontSize: 10),)),
                     ],
                   ),
                    if ( isLoading )
@@ -190,7 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> onSubmit(String name, String inventorykey) async {
-    print('onSubmit:');
+    //print('onSubmit:');
     try {
       var url = Uri.parse('${Preferences.servicesURL}/api/Audit/auditauthenticate');
       //print('url: ${url}');
@@ -207,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (respuesta.statusCode == 200) {
         var loginResponseBody = (jsonDecode(respuesta.body));
-        print('statusCode: ${respuesta.body}');
+        //print('statusCode: ${respuesta.body}');
         if (!loginResponseBody['success']) {
           showDialog(
               barrierDismissible: true,
@@ -245,7 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
             g_auditType = loginResponseBody['auditType'].round();
             g_stockDate = DateTime.parse(loginResponseBody['stockDate']);
             g_user_rol = loginResponseBody['rol'];
-            print('g_user_rol: ${g_user_rol}');
+            //print('g_user_rol: ${g_user_rol}');
           });
 
           writeToLog('Login a registrar: ${g_user} - TipoAuditoria: ${g_auditType} - JOB: ${g_customerId}, ${g_storeId}, ${g_stockDate}');
@@ -256,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
           //print('totalDepartments: ${totalDepartments}');
           //print('totalalerts: ${totalalerts}');
-          print('inventoryManager: ${inventoryManager}');
+          //print('inventoryManager: ${inventoryManager}');
 
           if (g_auditType == 1) {
             if (totalDepartments > 0 && totalalerts > 0) {
@@ -330,11 +330,11 @@ class _LoginScreenState extends State<LoginScreen> {
               else if(g_user_rol == 'SUPERVISOR')
                 Navigator.pushReplacement(context, department_route);
               else if(g_user_rol == 'AUDITOR'){
-                print('cargar pantalla AUDITOR');
+                //print('cargar pantalla AUDITOR');
                 //DBProvider.db.downloadAuditorDepartmentSectionSkuToAudit();
                 Navigator.pushReplacement(context, auditor_route);
               }
-              print('totalalerts');
+              //print('totalalerts');
             }
             else {
               showDialog(
@@ -369,7 +369,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     }
     catch(e) {
-      print('Error ${e}');
+      //print('Error ${e}');
       showDialog(
           barrierDismissible: true,
           context: context,

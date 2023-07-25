@@ -305,7 +305,7 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
 
       for (i = 0; i < jobDetails.length; i++) {
         jobDetails[i].audit_Status = (jobDetails[i].audit_Action == 1)?jobDetails[i].audit_Status = 4:jobDetails[i].audit_Status = 3;
-        print(jobDetails[i].toJson());
+        //print(jobDetails[i].toJson());
       }
 
       try {
@@ -317,8 +317,8 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
           'tagNumber' : g_tagNumber,
           'jobDetailAuditModel' : jobDetails
         };
-        print(' params:${json.encode(params)}');
-        print(' jobDetailAuditModel:${json.encode(jobDetails)}');
+        //print(' params:${json.encode(params)}');
+        //print(' jobDetailAuditModel:${json.encode(jobDetails)}');
         var response = await http.post(
             url,
             headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
@@ -336,7 +336,7 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
         tipoerror = 1;
       }
       catch(e){
-        print(' JOB_DETAILS_AUDIT already exist in TOMI .${e.toString()}');
+        //print(' JOB_DETAILS_AUDIT already exist in TOMI .${e.toString()}');
         tipoerror = 2;
       }
       isLoading = false;

@@ -34,7 +34,7 @@ class DBProvider{
 
   Future<Database> initDB() async{
    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-   final path = join( documentsDirectory.path, 'TomiDB17.db' );
+   final path = join( documentsDirectory.path, 'TomiDB18.db' );
    print ( path );
 
    return await openDatabase(
@@ -149,13 +149,13 @@ class DBProvider{
                 AUDIT_REASON_CODE  INTEGER,
                 SENT               INTEGER DEFAULT 0,
                 CAPTURED_DATE_TIME TEXT,
-                TERMINAL           TEXT,
-                PRIMARY KEY (CUSTOMER_ID, STORE_ID, STOCK_DATE, DEPARTMENT_ID, SECTION_ID, REC, CODE)
+                TERMINAL           TEXT
             );
       ''');
      }
    );
   }
+   // PRIMARY KEY (CUSTOMER_ID, STORE_ID, STOCK_DATE, DEPARTMENT_ID, SECTION_ID, REC, CODE)
 
   Future<int?> nuevoJobAudit(JobAudit ja) async{
     final db = await database;
@@ -179,8 +179,8 @@ class DBProvider{
   //CUSTOMER_ID, STORE_ID, STOCK_DATE, DEPARTMENT_ID, SECTION_ID, REC, CODE
     final res = await db?.update('SKU_VARIATION_DEPT_AUDIT',
         jds.toJson(),
-        where : 'CUSTOMER_ID = ? and STORE_ID = ? and STOCK_DATE = ? and DEPARTMENT_ID = ? and SECTION_ID = ? and REC = ? and CODE = ?',
-        whereArgs: [jds.customer_Id, jds.store_Id, jds.stock_Date.toString().substring(0,10), jds.department_Id, jds.section_Id, jds.rec, jds.code]);
+        where : 'CUSTOMER_ID = ? and STORE_ID = ? and STOCK_DATE = ? and DEPARTMENT_ID = ? and SECTION_ID = ? and REC = ? and CODE = ? and CAPTURED_DATE_TIME = ?',
+        whereArgs: [jds.customer_Id, jds.store_Id, jds.stock_Date.toString().substring(0,10), jds.department_Id, jds.section_Id, jds.rec, jds.code, jds.captured_Date_Time]);
     return res;
   }
 
@@ -189,16 +189,16 @@ class DBProvider{
     //print(jda.toJson());
 
     final res = await db?.delete('SKU_VARIATION_DEPT_AUDIT',
-        where : 'CUSTOMER_ID = ? and STORE_ID = ? and STOCK_DATE = ? and DEPARTMENT_ID = ? and SECTION_ID = ? and REC = ? and CODE = ?',
-        whereArgs: [jds.customer_Id, jds.store_Id, jds.stock_Date.toString().substring(0,10), jds.department_Id, jds.section_Id, jds.rec, jds.code]);
+        where : 'CUSTOMER_ID = ? and STORE_ID = ? and STOCK_DATE = ? and DEPARTMENT_ID = ? and SECTION_ID = ? and REC = ? and CODE = ? and CAPTURED_DATE_TIME = ?',
+        whereArgs: [jds.customer_Id, jds.store_Id, jds.stock_Date.toString().substring(0,10), jds.department_Id, jds.section_Id, jds.rec, jds.code, jds.captured_Date_Time]);
     return res;
   }
 
   Future<int?> updateJobDetailAudit(jobDetailAudit jda) async {
     final db = await database;
     int? res = 0;
-    print('updateJobDetailAudit:');
-    print(jda.toJson());
+    //print('updateJobDetailAudit:');
+    //print(jda.toJson());
     try {
       res = await db?.update('JOB_DETAILS_AUDIT',
           jda.toJson(),
@@ -207,7 +207,7 @@ class DBProvider{
 
     } on DatabaseException
     catch(e) {
-      print(e);
+      //print(e);
     }
 
     return res;
@@ -215,7 +215,7 @@ class DBProvider{
 
   Future<int?> deleteJobDetailAudit(jobDetailAudit jda) async {
     final db = await database;
-    //print(jda.toJson());
+    ////print(jda.toJson());
 
     final res = await db?.delete('JOB_DETAILS_AUDIT',
         where : 'CUSTOMER_ID = ? and STORE_ID = ? and STOCK_DATE = ? and JOB_DETAILS_ID = ? and TAG_NUMBER = ?',
@@ -256,7 +256,7 @@ class DBProvider{
   Future<int?> deleteAllDepartmentSectionSku() async {
     final db = await database;
     final res = await db?.delete('SKU_VARIATION_DEPT_AUDIT');
-    print('SKU_VARIATION_DEPT_AUDIT: $res');
+    //print('SKU_VARIATION_DEPT_AUDIT: $res');
     return res;
   }
 
@@ -339,13 +339,13 @@ class DBProvider{
 
     try {
       res = (await db?.insert('SKU_VARIATION_DEPT_AUDIT', jda.toJson()))!;
-      print('nuevoJobAuditSkuVariationDept: REC: ${jda.rec} sent:${jda.sent}');
+      //print('nuevoJobAuditSkuVariationDept: REC: ${jda.rec} sent:${jda.sent}');
 
     } on DatabaseException
     catch(e) {
-      print('updateJobSkuVariationDeptAudit: REC: ${jda.rec} sent:${jda.sent}');
+      //print('updateJobSkuVariationDeptAudit: REC: ${jda.rec} sent:${jda.sent}');
       if (jda.sent == 1) {
-        print('SKU_VARIATION_DEPT_AUDIT update exist: ${jda.rec}');
+        //print('SKU_VARIATION_DEPT_AUDIT update exist: ${jda.rec}');
         updateJobSkuVariationDeptAudit(jda);
       }
     }
@@ -371,14 +371,14 @@ class DBProvider{
       jda.operation = 1;
     }
 
-    print('nuevoJobDetailAudit: ${jda.code}');
+    //print('nuevoJobDetailAudit: ${jda.code}');
 
     try {
        res = (await db?.insert('JOB_DETAILS_AUDIT', jda.toJson()))!;
     } on DatabaseException
     catch(e) {
       //log(e.toString());
-      print('Registro ya existe, actualizar :${jda.job_Details_Id}');
+      //print('Registro ya existe, actualizar :${jda.job_Details_Id}');
        updateJobDetailAudit(jda);
     }
 
@@ -483,7 +483,7 @@ class DBProvider{
       whereArgs: [g_customerId, g_storeId, g_stockDate.toString().substring(0,10),g_departmentNumber,g_sectionNumber,0,0,3],
       orderBy: orderBy,
     );
-    print('getAuditorSkuVariationDeptAuditedandPendingtosend:${res}');
+    ////print('getAuditorSkuVariationDeptAuditedandPendingtosend:${res}');
     return res?.map((s) => jobAuditSkuVariationDept.fromJson(s)).toList();
   }
 
@@ -494,7 +494,7 @@ class DBProvider{
       whereArgs: [g_customerId, g_storeId, g_stockDate.toString().substring(0,10),g_departmentNumber,g_sectionNumber,3,0],
       orderBy: orderBy,
     );
-    print('getAuditorSkuVariationDeptAuditedandNewPendingtosend:${res}');
+    //print('getAuditorSkuVariationDeptAuditedandNewPendingtosend:${res}');
     return res?.map((s) => jobAuditSkuVariationDept.fromJson(s)).toList();
   }
 
@@ -505,7 +505,7 @@ class DBProvider{
       whereArgs: [customerId, storeId, stockDate.toString().substring(0,10)],
       orderBy: orderBy,
     );
-    //print('getJobAuditSkuVariationDeptToAudit:${res}');
+     //print('getJobAuditSkuVariationDeptToAudit:${res}');
     return res?.map((s) => jobAuditSkuVariationDept.fromJson(s)).toList();
   }
 
@@ -566,7 +566,7 @@ DEPARTMENTS
     var uri = '${Preferences.servicesURL}/api/Audit/GetOneAuditDepartmentSectionSkuList/${g_sectionNumber}/${g_departmentNumber}/${g_customerId}/${g_storeId}/${g_stockDate}/${rec.round()}';
     var url = Uri.parse(uri);
     var response = await http.get(url);
-    print ('downloadOneDepartmentSectionSkuToAudit: ${json.decode(response.body)}');
+    //print ('downloadOneDepartmentSectionSkuToAudit: ${json.decode(response.body)}');
     final List parsedList = json.decode(response.body);
     List<jobAuditSkuVariationDept> list = parsedList.map((e) => jobAuditSkuVariationDept.fromTOMIDBJson(e)).toList();
 
@@ -583,7 +583,7 @@ DEPARTMENTS
     var uri = '${Preferences.servicesURL}/api/Audit/GetOneAuditDepartmentSectionSkuList/${g_sectionNumber}/${g_departmentNumber}/${g_customerId}/${g_storeId}/${g_stockDate}/${rec.round()}';
     var url = Uri.parse(uri);
     var response = await http.get(url);
-    print ('downloadOneDepartmentSectionSkuToAudit_CancelAuditor: ${json.decode(response.body)}');
+    //print ('downloadOneDepartmentSectionSkuToAudit_CancelAuditor: ${json.decode(response.body)}');
     final List parsedList = json.decode(response.body);
     List<jobAuditSkuVariationDept> list = parsedList.map((e) => jobAuditSkuVariationDept.fromTOMIDBJson(e)).toList();
 
@@ -599,7 +599,7 @@ DEPARTMENTS
     var res = 0;
     final db = await database;
 
-    print('UpdateJobAuditSkuVariationDept_CancelAuditor: REC: ${jda.rec}');
+    //print('UpdateJobAuditSkuVariationDept_CancelAuditor: REC: ${jda.rec}');
 
     try {
         updateJobSkuVariationDeptAudit(jda);
@@ -616,9 +616,9 @@ DEPARTMENTS
     //             int storeId, DateTime stockDate, string user)
     var uri = '${Preferences.servicesURL}/api/Audit/GetAuditDepartmentSectionSkuList/${g_sectionNumber}/${g_departmentNumber}/${g_customerId}/${g_storeId}/${g_stockDate}/${g_user}';
     var url = Uri.parse(uri);
-    print ('url: ${url}');
+    //print ('url: ${url}');
     var response = await http.get(url);
-    print (json.decode(response.body));
+    //print (json.decode(response.body));
     final List parsedList = json.decode(response.body);
     List<jobAuditSkuVariationDept> list = parsedList.map((e) => jobAuditSkuVariationDept.fromTOMIDBJson(e)).toList();
 
@@ -635,9 +635,9 @@ DEPARTMENTS
     //GetAuditTagToProcessAsync/{operation:int}/{customerId:int}/{storeId:int}/{stockDate:DateTime}
     var uri = '${Preferences.servicesURL}/api/Audit/GetAuditTagToProcessAsync/1/${g_customerId}/${g_storeId}/${g_stockDate}';
     var url = Uri.parse(uri);
-    print (uri);
+    //print (uri);
     var response = await http.get(url);
-    print (response.body);
+    //print (response.body);
     final List parsedList = json.decode(response.body);
     //print('downloadAuditorDepartmentSectionSkuToAudit: ${parsedList}');
     //List<jobAuditSkuVariationDept> list = parsedList.map((e) => jobAuditSkuVariationDept.fromTOMIDBJson(e)).toList();
@@ -792,7 +792,7 @@ DEPARTMENTS
        // print('downloadInventoryManager: ${response.body}');
       if (loginResponseBody['success']) {
         g_im_password = loginResponseBody['password'];
-        print('contraseña IM: ${g_im_password}');
+        //print('contraseña IM: ${g_im_password}');
         i = await nuevoInventoryManager(double.parse(loginResponseBody['userId'].toString()).round(), loginResponseBody['password']);
       }
     }
@@ -802,7 +802,7 @@ DEPARTMENTS
   Future<int?> nuevoInventoryManager(int userid, String password) async{
     int? res = 0;
     final db = await database;
-    print('nuevoInventoryManager: ${userid} ${password}');
+    //print('nuevoInventoryManager: ${userid} ${password}');
     try {
       res = await db?.rawInsert('''
         Insert into IM_AUDIT (
@@ -832,7 +832,7 @@ DEPARTMENTS
     var uri = '${Preferences.servicesURL}/api/ProgramTerminal/GetAlerts/${g_inventorykey}';
     var url = Uri.parse(uri);
     var response = await http.get(url);
-    print('Get Alerts: ${json.decode(response.body)}');
+    //print('Get Alerts: ${json.decode(response.body)}');
     final List parsedList = json.decode(response.body);
     List<JobAlertParameter> list = parsedList.map((e) => JobAlertParameter.fromJson(e)).toList();
 
@@ -858,10 +858,11 @@ DEPARTMENTS
         'operation' : 1,
         'action': action,
         'sourceAction' : sourceAction,
-        'jobDetailsIds' : jobDetailsAudit
+        'jobDetailsIds' : jobDetailsAudit,
+        'auditorId' : g_user
       };
-      print(' params:${json.encode(params)}');
-      print(' jobDetailAuditModel:${json.encode(jobDetails)}');
+      //print(' params:${json.encode(params)}');
+      //print(' jobDetailAuditModel:${json.encode(jobDetails)}');
       var response = await http.post(
           url,
           headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
@@ -952,44 +953,5 @@ DEPARTMENTS
     return res;
   }
 
-/*
-  Future<List<JobDepartment>> testFutureBuilderDepartments() async{
-
-    var uri = '${Preferences.servicesURL}/api/ProgramTerminal/GetDepartments/${g_inventorykey}';
-    var url = Uri.parse(uri);
-    var response = await http.get(url);
-    //print(json.decode(response.body));
-    final List parsedList = json.decode(response.body);
-    List<JobDepartment> list = parsedList.map((e) => JobDepartment.fromJson(e)).toList();
-
-    return list;
-  }
-
-  Future<List<JobMasterFile>> testFutureBuilderMasterFile() async {
-       List<JobMasterFile> list = [];
-      var url = Uri.parse('${Preferences.servicesURL}/api/ProgramTerminal/GetMFAudit');
-      var respuesta = await http.post(
-          url,
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(<String, String>{
-            'operation': '1',
-            'inventoryKey': g_inventorykey,
-            'page': '0',
-            'limit': '20000'
-          }));
-
-      if (respuesta.statusCode == 200) {
-        var responseBody = (jsonDecode(respuesta.body));
-        final List parsedList = responseBody['auditsmf'];
-        list = parsedList.map((e) => JobMasterFile.fromJson(e)).toList();
-        print (list.length);
-        g_countMasterfile = list.length;
-        return list;
-      }
-       return list;
-  }
-*/
 
 }

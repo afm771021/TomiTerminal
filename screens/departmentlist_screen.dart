@@ -65,8 +65,8 @@ class _DepartmentListScreenState extends State<DepartmentListScreen> {
                     if (sectionId != null) {
                       g_sectionNumber = sectionId.toInt();
                     }
-                    print('g_departmentNumber: ${g_departmentNumber}');
-                    print('g_sectionNumber:${g_sectionNumber}');
+                    //print('g_departmentNumber: ${g_departmentNumber}');
+                    //print('g_sectionNumber:${g_sectionNumber}');
                   });
                   DBProvider.db.downloadDepartmentSectionSkuToAudit();
                   Navigator.pushReplacementNamed(context, 'DepartmentSectionListDetails');

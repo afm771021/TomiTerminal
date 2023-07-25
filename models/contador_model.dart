@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 class ContadorModel extends ChangeNotifier {
-  int _valorInicialSegundos = 7200; // 2 horas en segundos
-  int _segundosRestantes = 7200;
+  int _valorInicialSegundos = 0; // 2 horas en segundos
+  int _segundosRestantes = 0;
   Timer? _timer;
 
   int get segundosRestantes => _segundosRestantes;
@@ -14,10 +14,7 @@ class ContadorModel extends ChangeNotifier {
 
   void _iniciarContador() {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      _segundosRestantes--;
-      if (_segundosRestantes <= 0) {
-        _timer?.cancel();
-      }
+      _segundosRestantes++;
       notifyListeners();
     });
   }

@@ -47,7 +47,7 @@ class _DepartmentSectionEditScreenState extends State<DepartmentSectionEditScree
 
     final timestamp = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
     final logWithTimestamp = '[$timestamp] $log\n';
-    print('${directory.path}/log.txt');
+    //print('${directory.path}/log.txt');
     await file.writeAsString(logWithTimestamp, mode: FileMode.append);
   }
 
@@ -108,11 +108,11 @@ class _DepartmentSectionEditScreenState extends State<DepartmentSectionEditScree
             //print('Precio: ${widget.jAuditSkuVariationDept.sale_Price}');
             //print('Cantidad: ${widget.jAuditSkuVariationDept.pzas}');
             //print('Nueva Cantidad: ${widget.jAuditSkuVariationDept.audit_New_Quantity}');
-            print('Costo: ${widget.jAuditSkuVariationDept.sale_Price * widget.jAuditSkuVariationDept.pzas}');
-            print('Nuevo Costo: ${widget.jAuditSkuVariationDept.sale_Price * widget.jAuditSkuVariationDept.audit_New_Quantity}');
+            //print('Costo: ${widget.jAuditSkuVariationDept.sale_Price * widget.jAuditSkuVariationDept.pzas}');
+            //print('Nuevo Costo: ${widget.jAuditSkuVariationDept.sale_Price * widget.jAuditSkuVariationDept.audit_New_Quantity}');
 
             if(((widget.jAuditSkuVariationDept.sale_Price * widget.jAuditSkuVariationDept.pzas)-(widget.jAuditSkuVariationDept.sale_Price * widget.jAuditSkuVariationDept.audit_New_Quantity)).abs() > amount! ){
-              print('Diferencia Costo: ${((widget.jAuditSkuVariationDept.sale_Price * widget.jAuditSkuVariationDept.pzas)-(widget.jAuditSkuVariationDept.sale_Price * widget.jAuditSkuVariationDept.audit_New_Quantity)).abs()}');
+              //print('Diferencia Costo: ${((widget.jAuditSkuVariationDept.sale_Price * widget.jAuditSkuVariationDept.pzas)-(widget.jAuditSkuVariationDept.sale_Price * widget.jAuditSkuVariationDept.audit_New_Quantity)).abs()}');
               widget.jAuditSkuVariationDept.audit_Action = 5;
             }
 
@@ -125,9 +125,10 @@ class _DepartmentSectionEditScreenState extends State<DepartmentSectionEditScree
             //print('jAuditSkuVariationDept.sent: ${widget.jAuditSkuVariationDept.sent}');
             DBProvider.db.updateJobSkuVariationDeptAudit(widget.jAuditSkuVariationDept);
 
-            writeToLog('Edit Record: ${widget.jAuditSkuVariationDept.code} value: ${widget.jAuditSkuVariationDept.pzas} - new value: ${widget.jAuditSkuVariationDept.audit_New_Quantity} Diferencia Costo: ${((widget.jAuditSkuVariationDept.sale_Price * widget.jAuditSkuVariationDept.pzas)-(widget.jAuditSkuVariationDept.sale_Price * widget.jAuditSkuVariationDept.audit_New_Quantity)).abs()} - sent error: $tipoerror');
+            //writeToLog('Edit Record: ${widget.jAuditSkuVariationDept.code} value: ${widget.jAuditSkuVariationDept.pzas} - new value: ${widget.jAuditSkuVariationDept.audit_New_Quantity} Diferencia Costo: ${((widget.jAuditSkuVariationDept.sale_Price * widget.jAuditSkuVariationDept.pzas)-(widget.jAuditSkuVariationDept.sale_Price * widget.jAuditSkuVariationDept.audit_New_Quantity)).abs()} - sent error: $tipoerror');
 
             Navigator.pushReplacementNamed(context, 'DepartmentSectionListDetails');
+            //Performance --> Navigator.pop(context);
 
           }
         },
@@ -148,11 +149,11 @@ class _DepartmentSectionEditScreenState extends State<DepartmentSectionEditScree
 
     jAuditSkuVariationDetails.add(jAuditSkuVariationDetailsRecord);
     //writeToLog('Count Records to send: ${jAuditSkuVariationDetails.length}');
-    print('sendEditJobDetail Count Records to send: ${jAuditSkuVariationDetails.length}');
+    //print('sendEditJobDetail Count Records to send: ${jAuditSkuVariationDetails.length}');
 
     for (i = 0; i < jAuditSkuVariationDetails.length; i++) {
       jAuditSkuVariationDetails[i].audit_Status = (jAuditSkuVariationDetails[i].audit_Action == 1)?jAuditSkuVariationDetails[i].audit_Status = 4:jAuditSkuVariationDetails[i].audit_Status = 3;
-      print(jAuditSkuVariationDetails[i].toJson());
+      //print(jAuditSkuVariationDetails[i].toJson());
       //writeToLog('record: i - Json: ${jAuditSkuVariationDetails[i].toJson().toString()}');
     }
 
@@ -167,9 +168,9 @@ class _DepartmentSectionEditScreenState extends State<DepartmentSectionEditScree
         'closeSection' : 0,
         'skuVariationAuditModel' : jAuditSkuVariationDetails
       };
-       print(' url: ${url}');
-       print(' params:${json.encode(params)}');
-       print(' jAuditSkuVariationDetails:${json.encode(jAuditSkuVariationDetails)}');
+       //print(' url: ${url}');
+       //print(' params:${json.encode(params)}');
+       //print(' jAuditSkuVariationDetails:${json.encode(jAuditSkuVariationDetails)}');
       var response = await http.post(
           url,
           headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
@@ -177,7 +178,7 @@ class _DepartmentSectionEditScreenState extends State<DepartmentSectionEditScree
       );
       if (response.statusCode == 200) {
         Map<String, dynamic> data = jsonDecode(response.body);
-        print(' data .${data}');
+        //print(' data .${data}');
         if (!data["success"]){
           tipoerror = 2;
         }
@@ -282,7 +283,7 @@ class _EditFormState extends State<EditForm> {
                       widget.jAuditSkuVariationDept.audit_Reason_Code = 2;
                     }
 
-                    print('jAuditSkuVariationDept.audit_Reason_Code: ${value} ${widget.jAuditSkuVariationDept.audit_Reason_Code}');
+                    //print('jAuditSkuVariationDept.audit_Reason_Code: ${value} ${widget.jAuditSkuVariationDept.audit_Reason_Code}');
 
                     /*if (value == 'Preconteo Tienda erróneo.'){
                       widget.jAuditSkuVariationDept.audit_Reason_Code = 1;
