@@ -57,7 +57,7 @@ class _DepartmentListScreenState extends State<DepartmentListScreen> {
                 //textColor: Colors.indigo,
                 trailing: const Icon (Icons.download_for_offline,
                   color: Colors.green, size: 40,),
-                onTap: () async {
+                onTap: () async{
                   final department = departmentssections[index];
                   setState(() {
                     g_departmentNumber = department.departmentId!;
@@ -65,10 +65,17 @@ class _DepartmentListScreenState extends State<DepartmentListScreen> {
                     if (sectionId != null) {
                       g_sectionNumber = sectionId.toInt();
                     }
-                    //print('g_departmentNumber: ${g_departmentNumber}');
+                    print('g_departmentNumber: ${g_departmentNumber}');
                     //print('g_sectionNumber:${g_sectionNumber}');
                   });
-                  DBProvider.db.downloadDepartmentSectionSkuToAudit();
+                  //Descarga la información de del Departamento y la sección selecionada
+                  var startdate = await DBProvider.db.downloadDepartmentSectionSkuToAudit();
+                  print('Department lis screen --> startdate: ${startdate}');
+                  setState(() {
+                    g_depatmentStartDate = startdate;
+                  });
+                  print('Department lis screen --> g_depatmentStartDate: ${g_depatmentStartDate}');
+                  // Actializar la hora de inicio de auditoria del departamento
                   Navigator.pushReplacementNamed(context, 'DepartmentSectionListDetails');
                 },
               ),

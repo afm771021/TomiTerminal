@@ -31,6 +31,7 @@ class DepartmentSectionListDetailsScreen extends StatefulWidget {
 class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionListDetailsScreen> {
   var currencyFormatter = NumberFormat('#,##0.00', 'es_MX');
   bool isLoading = false;
+  final String startDate = (g_depatmentStartDate=="")?DateTime.now().toString():g_depatmentStartDate;
 
   void initState() {
     super.initState();
@@ -67,6 +68,14 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
     departmentSectionListProvider.getJobAuditSkuVariationDept(g_customerId, g_storeId, g_stockDate, g_departmentNumber, g_sectionNumber);
     final departmentSectionList = departmentSectionListProvider.jobAuditSkuVariationDepts;
 
+    DateTime fechaActual = DateTime.now();
+    DateTime fechaObjeto = DateTime.parse(startDate);
+
+    Duration diferencia = fechaActual.difference(fechaObjeto);
+    int horas = diferencia.inHours;
+    int minutos = diferencia.inMinutes.remainder(60);
+    int segundos = diferencia.inSeconds.remainder(60);
+
     int contador = 0;
     String sku_inicial = "";
     bool hideinfo = false;
@@ -78,36 +87,17 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
     return Scaffold(
       appBar: AppBar(
         title:  Center(
-          child: Consumer<ContadorModel>(
-            builder: (context, contador, _) {
-
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    children:[
-                      Text(
-                        'Department $g_departmentNumber - Section $g_sectionNumber     |   Progress ${porcentajeEditados.toStringAsFixed(1)}%    |     ',
-                        style: TextStyle(fontSize: 25),
-                      ),
-                      Text('${_formatTiempo(contador.segundosRestantes)}',
-                          style: TextStyle(fontSize: 30,color: contador.segundosRestantes >= 7200 ? Colors.red : Colors.white ),
-                      ),
-                      // const SizedBox(width: 50),
-                      // ElevatedButton(
-                      //   onPressed: contador.segundosRestantes == 0
-                      //       ? () {
-                      //              contador.reiniciarContador();
-                      //            } // Si el contador es cero, deshabilitar el botón
-                      //       : null,
-                      //   child: Text('Reiniciar Contador',style: TextStyle(fontSize: 10),),
-                      // ),
-                    ]
-                  )
-                ],
-              );
-            },
-          ),
+          child: Row(
+                  children:[
+                    Text(
+                      'Department $g_departmentNumber - Section $g_sectionNumber  -  |   Progress ${porcentajeEditados.toStringAsFixed(1)}%    |     ',
+                      style: TextStyle(fontSize: 25),
+                    ),
+                    //Text('${_formatTiempo(contador.segundosRestantes)}',
+                    //    style: TextStyle(fontSize: 30,color: contador.segundosRestantes >= 7200 ? Colors.red : Colors.white ),
+                    //),
+                  ]
+          )
         ),//Text('Department $g_departmentNumber - Section $g_sectionNumber'),
         actions: [
           IconButton(
@@ -197,6 +187,10 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
             child: Column(
               children: [
+                Text('Fecha Hora Dispositivo: ${fechaActual.toString()}'),
+                Text('Fecha Hora Inicio Auditoria: ${fechaObjeto.toString()}'),
+                Text(startDate),
+                Text('$horas:$minutos:$segundos'),
                 const SizedBox(height: 3,),
                 //_HeaderScreen(),
                 _ProductDetails(),

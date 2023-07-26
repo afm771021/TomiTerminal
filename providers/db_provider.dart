@@ -34,7 +34,7 @@ class DBProvider{
 
   Future<Database> initDB() async{
    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-   final path = join( documentsDirectory.path, 'TomiDB18.db' );
+   final path = join( documentsDirectory.path, 'TomiDB20.db' );
    print ( path );
 
    return await openDatabase(
@@ -94,8 +94,9 @@ class DBProvider{
       await db.execute('''
             create table DEPARTMENTS
             (
-                InventoryKey         TEXT         NOT NULL,
-                depId                TEXT         NOT NULL,
+                InventoryKey          TEXT         NOT NULL,
+                depId                 TEXT         NOT NULL,
+                Start_Audit_Date_Time TEXT,
                 PRIMARY KEY (InventoryKey, depId)
             );
       ''');
@@ -149,7 +150,8 @@ class DBProvider{
                 AUDIT_REASON_CODE  INTEGER,
                 SENT               INTEGER DEFAULT 0,
                 CAPTURED_DATE_TIME TEXT,
-                TERMINAL           TEXT
+                TERMINAL           TEXT,
+                PRIMARY KEY (CUSTOMER_ID, STORE_ID, STOCK_DATE, DEPARTMENT_ID, SECTION_ID, REC, CODE, CAPTURED_DATE_TIME)
             );
       ''');
      }
@@ -611,22 +613,71 @@ DEPARTMENTS
     return res;
   }
 
-  Future<void> downloadDepartmentSectionSkuToAudit() async {
-    //GetAuditDepartmentSectionSkuListAsync(int sectionId, string departmentId, int customerId,
-    //             int storeId, DateTime stockDate, string user)
+  Future<String> downloadDepartmentSectionSkuToAudit() async {
+
     var uri = '${Preferences.servicesURL}/api/Audit/GetAuditDepartmentSectionSkuList/${g_sectionNumber}/${g_departmentNumber}/${g_customerId}/${g_storeId}/${g_stockDate}/${g_user}';
     var url = Uri.parse(uri);
+    var i = 0;
     //print ('url: ${url}');
     var response = await http.get(url);
     //print (json.decode(response.body));
     final List parsedList = json.decode(response.body);
     List<jobAuditSkuVariationDept> list = parsedList.map((e) => jobAuditSkuVariationDept.fromTOMIDBJson(e)).toList();
 
-    for(var i=0;i<list.length;i++){
+    for(i=0;i<list.length;i++){
       nuevoJobAuditSkuVariationDept(list[i]);
-      //print('Lista: ${i}');
-      //print('Lista: $list[i]');
     }
+
+    // Consultar si existe la hora de inicio de la auditoría del departamento - sección
+    // late bool existDepartment = false;
+    var departmentStartDate = (await DBProvider.db.DepartmentStartDate())!;
+    //print ('existDepartment: ${departmentStartDate}');
+    if (departmentStartDate == "") // Si no hay fecha de StartDate ir a tomi para consultarla y guardarla en la BD local
+      {
+        uri = '${Preferences.servicesURL}/api/Audit/GetAuditDepartmentSectionSkuStartDate/${g_departmentNumber}/${g_customerId}/${g_storeId}/${g_stockDate}';
+        url = Uri.parse(uri);
+        response = await http.get(url);
+        print(json.decode(response.body));
+        var update = (await DBProvider.db.UpdateDepartmentStartDate(json.decode(response.body)))!;
+        g_depatmentStartDate = departmentStartDate = json.decode(response.body);
+        print('if: ${g_depatmentStartDate}');
+      }
+    else{
+      g_depatmentStartDate = departmentStartDate;
+      print('else: ${g_depatmentStartDate}');
+    }
+
+    return departmentStartDate;
+  }
+
+  Future<int?> UpdateDepartmentStartDate(String startDate) async {
+    final db = await database;
+    int? res = 0;
+    try {
+      res = await db?.rawUpdate('''
+          UPDATE DEPARTMENTS SET Start_Audit_Date_Time = ? WHERE InventoryKey = ? and depId = ?''',
+          ['${startDate}','${g_inventorykey}','${g_departmentNumber}']
+          );
+    } on DatabaseException
+    catch(e) {
+      print(e);
+    }
+    return res;
+  }
+
+  Future<String?> DepartmentStartDate () async{
+    final db = await database;
+
+    final start_Audit_Date_Time = await db?.rawQuery('''
+            select Start_Audit_Date_Time, depId from DEPARTMENTS where InventoryKey = '${g_inventorykey}' and depId = '${g_departmentNumber}'
+            ''');
+
+    //print(start_Audit_Date_Time);
+    //print(start_Audit_Date_Time![0]['Start_Audit_Date_Time']);
+    if (start_Audit_Date_Time![0]['Start_Audit_Date_Time'] != null)
+      return start_Audit_Date_Time![0]['Start_Audit_Date_Time'].toString();
+
+    return "";
   }
 
   /* Descarga en la tablet todos los registros por validar por el Auditor para SORIANA*/
