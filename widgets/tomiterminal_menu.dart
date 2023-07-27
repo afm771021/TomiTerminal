@@ -111,7 +111,9 @@ class _DrawerHeader extends StatelessWidget {
         )
         ),
         child: Container(
-          child: Text('     User: ${g_user}    Rol: ${g_user_rol}'),
+          alignment: Alignment.topCenter,
+          child: Text('    User: ${g_user}    Rol: ${g_user_rol}',
+          style: TextStyle(fontSize: 12,color: Colors.white,),),
         ),
     );
   }

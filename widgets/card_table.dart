@@ -26,6 +26,34 @@ class _CardTableState extends State<CardTable> {
         Table(
           children:  [
             TableRow(
+                children: [
+                  _SingleCard(color:Colors.teal,
+                    icon: Icons.bar_chart,
+                    text: 'Total Departments',
+                    text2: jobIndicators.totalDepartments.round().toString(),
+                    text3: '',),
+                  _SingleCard(color:Colors.lightBlueAccent,
+                    icon: Icons.checklist,
+                    text: 'Released Departments',
+                    text2:  jobIndicators.releasedDepartments.round().toString(),
+                    text3: '',),
+                ]
+            ),
+            TableRow(
+                children: [
+                  _SingleCard(color:Colors.purple,
+                    icon: Icons.bar_chart,
+                    text: 'In Progress Departments',
+                    text2: jobIndicators.inProgressDepartments.round().toString(),
+                    text3: '',),
+                  _SingleCard(color:Colors.black38,
+                    icon: Icons.checklist,
+                    text: 'Completed Departments',
+                    text2:  jobIndicators.completedDepartments.round().toString(),
+                    text3: '',),
+                ]
+            ),
+            TableRow(
               children: [
                 _SingleCard(color:Colors.orangeAccent,
                             icon: Icons.bar_chart,

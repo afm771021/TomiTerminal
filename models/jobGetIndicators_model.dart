@@ -20,6 +20,10 @@ class JobGetIndicators {
     required this.auditInProgressTags,
     required this.employeeProductivity,
     required this.departments,
+    required this.totalDepartments,
+    required this.releasedDepartments,
+    required this.inProgressDepartments,
+    required this.completedDepartments,
   });
 
   double totalTags;
@@ -32,6 +36,10 @@ class JobGetIndicators {
   double auditInProgressTags;
   EmployeeProductivity employeeProductivity;
   List<Department> departments;
+  double totalDepartments;
+  double releasedDepartments;
+  double inProgressDepartments;
+  double completedDepartments;
 
   factory JobGetIndicators.fromJson(Map<String, dynamic> json) => JobGetIndicators(
     totalTags: json["totalTags"],
@@ -44,6 +52,10 @@ class JobGetIndicators {
     auditInProgressTags: json["auditInProgressTags"],
     employeeProductivity: EmployeeProductivity.fromJson(json["employeeProductivity"]),
     departments: List<Department>.from(json["departments"].map((x) => Department.fromJson(x))),
+    totalDepartments: json["totalDepartments"] ?? 0,
+    releasedDepartments: json["releasedDepartments"] ?? 0,
+    inProgressDepartments: json["inProgressDepartments"] ?? 0,
+    completedDepartments: json["completedDepartments"] ?? 0,
   );
 
   Map<String, dynamic> toJson() => {
@@ -57,6 +69,10 @@ class JobGetIndicators {
     "auditInProgressTags": auditInProgressTags,
     "employeeProductivity": employeeProductivity.toJson(),
     "departments": List<dynamic>.from(departments.map((x) => x.toJson())),
+    "totalDepartments": totalDepartments,
+    "releasedDepartments": releasedDepartments,
+    "inProgressDepartments": inProgressDepartments,
+    "completedDepartments": completedDepartments,
   };
 }
 

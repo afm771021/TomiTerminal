@@ -15,7 +15,11 @@ class JobIndicatorsProvider extends ChangeNotifier{
                                       auditInProgressTags: 0,
                                       employeeProductivity: EmployeeProductivity(labels: [], series: []
                                       ),
-                                      departments: []
+                                      departments: [],
+                                      totalDepartments: 0,
+                                      releasedDepartments: 0,
+                                      inProgressDepartments: 0,
+                                      completedDepartments: 0,
                                       );
 
   loadIndicators () async{

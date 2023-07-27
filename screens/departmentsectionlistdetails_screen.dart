@@ -90,9 +90,14 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
           child: Row(
                   children:[
                     Text(
-                      'Department $g_departmentNumber - Section $g_sectionNumber  -  |   Progress ${porcentajeEditados.toStringAsFixed(1)}%    |     ',
-                      style: TextStyle(fontSize: 25),
+                      'Department $g_departmentNumber - Section $g_sectionNumber  -  |   Progress ${porcentajeEditados.toStringAsFixed(1)}%    |    ',
+                      style: TextStyle(fontSize: 20),
                     ),
+                    //Text('Fecha Hora Dispositivo: ${fechaActual.toString()}'),
+                    //Text('Fecha Hora Inicio Auditoria: ${fechaObjeto.toString()}'),
+                    //Text(startDate),
+                    Text('${horas.toString().padLeft(2, '0')}:${minutos.toString().padLeft(2, '0')}:${segundos.toString().padLeft(2, '0')}',
+                    style: TextStyle(fontSize:23, color: horas >= 2 ? Colors.red: Colors.white),),
                     //Text('${_formatTiempo(contador.segundosRestantes)}',
                     //    style: TextStyle(fontSize: 30,color: contador.segundosRestantes >= 7200 ? Colors.red : Colors.white ),
                     //),
@@ -187,11 +192,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
             child: Column(
               children: [
-                Text('Fecha Hora Dispositivo: ${fechaActual.toString()}'),
-                Text('Fecha Hora Inicio Auditoria: ${fechaObjeto.toString()}'),
-                Text(startDate),
-                Text('$horas:$minutos:$segundos'),
-                const SizedBox(height: 3,),
+                const SizedBox(height: 1,),
                 //_HeaderScreen(),
                 _ProductDetails(),
                 Expanded(
@@ -229,8 +230,6 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
 
                             if (_desc.isEmpty)
                               _desc = " ----------------------------------- ";
-
-
                             //print ('sku_inicial: ${sku_inicial} - contador: ${contador} - hideinfo:${hideinfo}');
                             contador++;
 
@@ -613,6 +612,7 @@ class _DepartmentSectionListDetailsScreenState extends State<DepartmentSectionLi
                                   ],
                                 ),
                               ),
+
                             );
                           }
                       ),
@@ -1048,16 +1048,16 @@ class _ProductDetails extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         width: double.infinity,
-        height: size.height * 0.10,
+        height: size.height * 0.06,
         decoration: _buildBoxDecoration(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Dept: ${g_departmentNumber}',
+            /*Text('Dept: ${g_departmentNumber}',
               style: const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-            ),
+            ),*/
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
