@@ -640,11 +640,11 @@ DEPARTMENTS
         print(json.decode(response.body));
         var update = (await DBProvider.db.UpdateDepartmentStartDate(json.decode(response.body)))!;
         g_depatmentStartDate = departmentStartDate = json.decode(response.body);
-        print('if: ${g_depatmentStartDate}');
+        //print('if: ${g_depatmentStartDate}');
       }
     else{
       g_depatmentStartDate = departmentStartDate;
-      print('else: ${g_depatmentStartDate}');
+      //print('else: ${g_depatmentStartDate}');
     }
 
     return departmentStartDate;

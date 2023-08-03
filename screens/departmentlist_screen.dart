@@ -65,16 +65,16 @@ class _DepartmentListScreenState extends State<DepartmentListScreen> {
                     if (sectionId != null) {
                       g_sectionNumber = sectionId.toInt();
                     }
-                    print('g_departmentNumber: ${g_departmentNumber}');
+                    //print('g_departmentNumber: ${g_departmentNumber}');
                     //print('g_sectionNumber:${g_sectionNumber}');
                   });
                   //Descarga la información de del Departamento y la sección selecionada
                   var startdate = await DBProvider.db.downloadDepartmentSectionSkuToAudit();
-                  print('Department lis screen --> startdate: ${startdate}');
+                  //print('Department lis screen --> startdate: ${startdate}');
                   setState(() {
                     g_depatmentStartDate = startdate;
                   });
-                  print('Department lis screen --> g_depatmentStartDate: ${g_depatmentStartDate}');
+                  //print('Department lis screen --> g_depatmentStartDate: ${g_depatmentStartDate}');
                   // Actializar la hora de inicio de auditoria del departamento
                   Navigator.pushReplacementNamed(context, 'DepartmentSectionListDetails');
                 },

@@ -128,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           )
                       ),
                       const SizedBox(height: 50,),
-                      const Center(child: Text ('(Ver. 2.3.3)', style: TextStyle(fontSize: 10),)),
+                      const Center(child: Text ('(Ver. 2.3.4)', style: TextStyle(fontSize: 10),)),
                     ],
                   ),
                    if ( isLoading )

@@ -130,12 +130,6 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                 Column(
                                                   children: [
                                                     Text(
-                                                      ' ${jobDetails[index].audit_New_Quantity.round()}     ', maxLines: 1, overflow: TextOverflow.ellipsis,)
-                                                  ],
-                                                ),
-                                                Column(
-                                                  children: [
-                                                    Text(
                                                       '${jobDetails[index].tag_Number.round()} ', maxLines: 1, overflow: TextOverflow
                                                         .ellipsis,)
                                                   ],
@@ -167,13 +161,25 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                 Column(
                                                   children: [
                                                     Text(
+                                                      '${jobDetails[index].sale_Price} ', maxLines: 1, overflow: TextOverflow.ellipsis,)
+                                                  ],
+                                                ),
+                                                Column(
+                                                  children: [
+                                                    Text(
                                                       '${jobDetails[index].quantity.round()} ', maxLines: 1, overflow: TextOverflow.ellipsis,)
                                                   ],
                                                 ),
                                                 Column(
                                                   children: [
                                                     Text(
-                                                      '${jobDetails[index].sale_Price} ', maxLines: 1, overflow: TextOverflow.ellipsis,)
+                                                      ' ${jobDetails[index].audit_New_Quantity.round()}     ', maxLines: 1, overflow: TextOverflow.ellipsis,)
+                                                  ],
+                                                ),
+                                                Column(
+                                                  children: [
+                                                    Text(
+                                                      '${(jobDetails[index].audit_New_Quantity*jobDetails[index].sale_Price)-(jobDetails[index].quantity*jobDetails[index].sale_Price)}', maxLines: 1, overflow: TextOverflow.ellipsis,)
                                                   ],
                                                 ),
                                                 Column(
@@ -614,13 +620,7 @@ class _ProductDetails extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text(' Oper. ',
-                      style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,),]
-                ),
-                Column(
-                    children:const [Text(' Qty new',
+                    children:const [Text('   Oper. ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
@@ -632,44 +632,56 @@ class _ProductDetails extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('CODE             ',
+                    children:const [Text('   CODE             ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('SKU      ',
+                    children:const [Text('   SKU      ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text(' nof  ',
+                    children:const [Text('     nof  ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
 
                 Column(
-                    children:const [Text('Dept  ',
+                    children:const [Text('  Dept  ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('Qty ',
+                    children:const [Text(' Price ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('Price',
+                    children:const [Text('   Qty ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text(' Desc                                               ',
+                    children:const [Text(' Qty new',
+                      style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,),]
+                ),
+                Column(
+                    children:const [Text('    Dif.                 ',
+                      style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,),]
+                ),
+                Column(
+                    children:const [Text('       Desc.                                 ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
@@ -693,7 +705,7 @@ class _ProductDetails extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,),]
                 ),
                 Column(
-                    children:const [Text('  Ok',
+                    children:const [Text('  Ok    ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
