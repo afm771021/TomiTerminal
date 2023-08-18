@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:tomi_terminal_audit2/models/jobDetailAudit_model.dart';
 import 'package:flutter/material.dart';
 
+import '../models/jobErrorTypology_model.dart';
 import '../providers/db_provider.dart';
 
 class JobDetailsEditScreen extends StatelessWidget {
@@ -45,9 +46,9 @@ class JobDetailsEditScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadiusDirectional.circular(10)),
                     title: const Text('Alert'),
-                    content: Column(
+                    content: const Column(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
+                      children: [
                         Text('New quantity and Reason Change are necessary !!'),
                         SizedBox(height: 10),
                       ],
@@ -178,13 +179,13 @@ class JobDetailsEditScreen extends StatelessWidget {
     if (quantity > 0) {
       if ((jdetailaudit.quantity - jdetailaudit.audit_New_Quantity).abs() > quantity)
         diferencequantity = true;
-      //print('cantidad: $quantity');
+      print('cantidad: $quantity');
     }
 
     if (amount > 0){
       if (((jdetailaudit.quantity * jdetailaudit.sale_Price) - (jdetailaudit.audit_New_Quantity * jdetailaudit.sale_Price)).abs() > amount)
         diferenceamount = true;
-      //print('monto: $amount');
+      print('monto: $amount');
     }
 
     if (!diferenceamount && !diferencequantity)
@@ -253,7 +254,7 @@ class _EditFormState extends State<EditForm> {
                 },
               ),
               const SizedBox(height: 10,),
-              DropdownButtonFormField(
+              /*DropdownButtonFormField(
                decoration: const InputDecoration(
                     icon: Icon(Icons.swipe_up),
                     labelText: 'Reason Change',
@@ -277,39 +278,45 @@ class _EditFormState extends State<EditForm> {
                   else if (value == 'Error conteo proveedor'){
                     widget.jdetailaudit.audit_Reason_Code = 2;
                   }
-
-                   /*if (value == 'Preconteo Tienda erróneo.'){
-                     widget.jdetailaudit.audit_Reason_Code = 1;
-                   }
-                   else if (value == 'Conteo Inicial Accurats erróneo'){
-                     widget.jdetailaudit.audit_Reason_Code = 2;
-                   }
-                   else if (value == 'Sku no corresponde.'){
-                     widget.jdetailaudit.audit_Reason_Code = 3;
-                   }
-                   else if (value == 'Caja en altillo sin SKU (QR)'){
-                     widget.jdetailaudit.audit_Reason_Code = 4;
-                   }
-                   else if (value == 'Caja en Altillos sin cantidad o cantidad errónea.'){
-                     widget.jdetailaudit.audit_Reason_Code = 5;
-                   }
-                   else if (value == 'Cantidad no corresponde.'){
-                     widget.jdetailaudit.audit_Reason_Code = 6;
-                   }
-                   else if (value == 'SKU no existe, se cambió por similar.'){
-                     widget.jdetailaudit.audit_Reason_Code = 7;
-                   }
-                   else if (value == 'Error en Unidad de medida.'){
-                     widget.jdetailaudit.audit_Reason_Code = 8;
-                   }
-                   else if (value == 'corrección por Tablet, errónea en cantidad'){
-                     widget.jdetailaudit.audit_Reason_Code = 9;
-                   }
-                   else if (value == 'corrección por Tablet, errónea en Sku.'){
-                     widget.jdetailaudit.audit_Reason_Code = 10;
-                   }*/
                 },
-              ),
+              ),*/
+              FutureBuilder<List<Map<String, dynamic>>?>(
+                future: DBProvider.db.getErrorTypologies(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (snapshot.hasData && snapshot.data != null) {
+                    List<Map<String, dynamic>> opciones = snapshot.data!;
+
+                    List<DropdownMenuItem<int>> dropdownItems = opciones.map((opcion) {
+                      int? valor = opcion['ERROR_ID'] as int?;
+                      String descripcion = opcion['DESCRIPTION'] as String;
+
+                      return DropdownMenuItem<int>(
+                        value: valor,
+                        child: Text(descripcion),
+                      );
+                    }).toList();
+
+                    return DropdownButtonFormField<int?>(
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.swipe_up),
+                        labelText: 'Reason Change',
+                      ),
+                      items: dropdownItems,
+                      onChanged: (selectedValue) {
+                        widget.jdetailaudit.audit_Reason_Code = selectedValue!.toDouble();
+                        print(widget.jdetailaudit.audit_Reason_Code);
+                      },
+
+                    );
+                  } else {
+                    return Text('No hay datos disponibles');
+                  }
+                },
+              )
             ],
           ),
         )

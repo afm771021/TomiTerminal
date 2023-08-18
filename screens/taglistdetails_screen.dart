@@ -162,8 +162,18 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
                             );
                           }
                       ),
-                    )
+                    ),
+                    const SizedBox(width: 200,
+                      height: 50,
+                      child: Center(
+                        child: Text(
+                          '',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
                   ],
+
                 ),
                 if ( isLoading )
                   Positioned(
@@ -178,6 +188,7 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
 
       ),
       floatingActionButton: FloatingActionButton(
+        mini: true,
         child: const Icon(Icons.add, size: 40,),
         onPressed: () {
           final route = MaterialPageRoute(
@@ -426,7 +437,7 @@ class _ProductDetails extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         width: double.infinity,
-        height: size.height * 0.08,
+        height: size.height * 0.12,
         decoration: _buildBoxDecoration(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

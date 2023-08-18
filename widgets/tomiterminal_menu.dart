@@ -26,7 +26,7 @@ class TomiTerminalMenu extends StatelessWidget {
             ),
           ),
           Visibility(
-            visible: (g_login && g_auditType == 1)?true:false,
+            visible: (g_login && g_auditType == 1 && g_user_rol == 'SUPERVISOR')?true:false,
             child: ListTile(
               leading:  const Icon( Icons.search, color: Colors.indigo,),
               title:  const Text('Search Tags'),
@@ -49,6 +49,17 @@ class TomiTerminalMenu extends StatelessWidget {
           ),
           Visibility(
             visible: (g_login && g_auditType == 2 && g_user_rol == 'AUDITOR')?true:false,
+            child: ListTile(
+              leading:  const Icon( Icons.search, color: Colors.indigo,),
+              title:  const Text('Auditor'),
+              onTap: (){
+                final route = MaterialPageRoute(builder: (context) => const AuditorListDetailsScreen());
+                Navigator.pushReplacement(context, route);
+              },
+            ),
+          ),
+          Visibility(
+            visible: (g_login && g_auditType == 1 && g_user_rol == 'AUDITOR')?true:false,
             child: ListTile(
               leading:  const Icon( Icons.search, color: Colors.indigo,),
               title:  const Text('Auditor'),

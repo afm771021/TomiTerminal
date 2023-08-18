@@ -286,7 +286,7 @@ class AddForm extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 10,),
-                DropdownButtonFormField(
+                /*DropdownButtonFormField(
                   decoration: const InputDecoration(
                     icon: Icon(Icons.swipe_up),
                     labelText: 'Reason Change',
@@ -311,7 +311,7 @@ class AddForm extends StatelessWidget {
                       jdetailaudit.audit_Reason_Code = 2;
                     }
 
-                    /*if (value == 'Preconteo Tienda erróneo.'){
+                    if (value == 'Preconteo Tienda erróneo.'){
                       jdetailaudit.audit_Reason_Code = 1.0;
                     }
                     else if (value == 'Conteo Inicial Accurats erróneo'){
@@ -340,7 +340,44 @@ class AddForm extends StatelessWidget {
                     }
                     else if (value == 'corrección por Tablet, errónea en Sku.'){
                       jdetailaudit.audit_Reason_Code = 10.0;
-                    }*/
+                    }
+                  },
+                ),*/
+                FutureBuilder<List<Map<String, dynamic>>?>(
+                  future: DBProvider.db.getErrorTypologies(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else if (snapshot.hasData && snapshot.data != null) {
+                      List<Map<String, dynamic>> opciones = snapshot.data!;
+
+                      List<DropdownMenuItem<int>> dropdownItems = opciones.map((opcion) {
+                        int? valor = opcion['ERROR_ID'] as int?;
+                        String descripcion = opcion['DESCRIPTION'] as String;
+
+                        return DropdownMenuItem<int>(
+                          value: valor,
+                          child: Text(descripcion),
+                        );
+                      }).toList();
+
+                      return DropdownButtonFormField<int?>(
+                        decoration: const InputDecoration(
+                          icon: Icon(Icons.swipe_up),
+                          labelText: 'Reason Add Record',
+                        ),
+                        items: dropdownItems,
+                        onChanged: (selectedValue) {
+                          jdetailaudit.audit_Reason_Code = selectedValue!.toDouble();
+                          print(jdetailaudit.audit_Reason_Code);
+                        },
+
+                      );
+                    } else {
+                      return Text('No hay datos disponibles');
+                    }
                   },
                 )
               ],

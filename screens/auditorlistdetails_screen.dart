@@ -179,28 +179,32 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
                                                 Column(
                                                   children: [
                                                     Text(
-                                                      '${(jobDetails[index].audit_New_Quantity*jobDetails[index].sale_Price)-(jobDetails[index].quantity*jobDetails[index].sale_Price)}', maxLines: 1, overflow: TextOverflow.ellipsis,)
+                                                      '${double.parse(((jobDetails[index].audit_New_Quantity*jobDetails[index].sale_Price)-(jobDetails[index].quantity*jobDetails[index].sale_Price)).toStringAsFixed(2))}', maxLines: 1, overflow: TextOverflow.ellipsis,)
                                                   ],
                                                 ),
                                                 Column(
                                                   children: [
                                                     Text(
-                                                      '${jobDetails[index].description}', maxLines: 1, overflow: TextOverflow.ellipsis,) //AAC:${jobDetails[index].audit_Action.round()} ASTA: ${jobDetails[index].audit_Status.round()} SEN:${jobDetails[index].sent.round()} SAC:${jobDetails[index].source_Action.round()}
+                                                      '${(jobDetails[index].description.length > 22)?jobDetails[index].description.substring(0,22):jobDetails[index].description.padRight(22)}', maxLines: 1, overflow: TextOverflow.ellipsis,) //AAC:${jobDetails[index].audit_Action.round()} ASTA: ${jobDetails[index].audit_Status.round()} SEN:${jobDetails[index].sent.round()} SAC:${jobDetails[index].source_Action.round()}
                                                   ],
                                                 ),
-                                                Column(
-                                                  children: [
-                                                    Text(
-                                                      '${(jobDetails[index].audit_Reason_Code)==1?"T":"P"}', maxLines: 1, overflow: TextOverflow.ellipsis,)
-                                                  ],
+                                                Visibility(
+                                                  visible: g_auditType == 2?true:false,
+                                                  child:
+                                                      Column(
+                                                        children: [
+                                                          Text(
+                                                            '${(jobDetails[index].audit_Reason_Code)==1?"T":"P"}', maxLines: 1, overflow: TextOverflow.ellipsis,)
+                                                        ],
                                                 ),
+                                                )
                                               ],
                                             ),
                                             trailing: Row(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 Visibility(
-                                                    visible:true,
+                                                    visible: g_auditType == 2?true:false,
                                                     child:
                                                     IconButton(
                                                         iconSize: 40,
@@ -613,99 +617,107 @@ class _ProductDetails extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Column(
-                    children:const [Text('Rec.',
+               const Column(
+                    children: [Text('Rec.',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
-                Column(
-                    children:const [Text('   Oper. ',
+                const Column(
+                    children: [Text('   Oper. ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
-                Column(
-                    children:const [Text(' Tag   ',
+                const Column(
+                    children: [Text(' Tag   ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
-                Column(
-                    children:const [Text('   CODE             ',
+                const Column(
+                    children: [Text('   CODE             ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
-                Column(
-                    children:const [Text('   SKU      ',
+                const Column(
+                    children: [Text('   SKU      ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
-                Column(
-                    children:const [Text('     nof  ',
+                const Column(
+                    children: [Text('     nof  ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
 
-                Column(
-                    children:const [Text('  Dept  ',
+                const Column(
+                    children:[Text('  Dept  ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
-                Column(
-                    children:const [Text(' Price ',
+                const Column(
+                    children:[Text(' Price ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
-                Column(
-                    children:const [Text('   Qty ',
+                const Column(
+                    children:[Text('   Qty ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
-                Column(
-                    children:const [Text(' Qty new',
+                const Column(
+                    children: [Text(' Qty new',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
-                Column(
-                    children:const [Text('    Dif.                 ',
+                const Column(
+                    children:[Text('    Dif.                 ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
-                Column(
-                    children:const [Text('       Desc.                                 ',
+                const Column(
+                    children:[Text('       Desc.                                 ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
-                Column(
-                    children:const [Text(' Reason ',
+                Visibility(
+                  visible: g_auditType == 2?true:false,
+                  child:
+                        const Column(
+                            children:[Text(' Reason ',
+                              style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,),]
+                        ),
+                ),
+                Visibility(
+                    visible: g_auditType == 2?true:false,
+                    child:
+                        const Column(
+                            children:[Text('  IM ',
+                              style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,),]
+                        )
+                ),
+                const Column(
+                    children:[Text(' Cancel ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]
                 ),
-                Column(
-                    children:const [Text('  IM ',
-                      style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,),]
-                ),
-                Column(
-                    children:const [Text(' Cancel ',
-                      style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,),]
-                ),
-                Column(
-                    children:const [Text('  Ok    ',
+                const Column(
+                    children:[Text('  Ok    ',
                       style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold,),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,),]

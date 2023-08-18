@@ -15,6 +15,7 @@ import '../models/jobAlertParameter_model.dart';
 import '../models/jobAuditDepartment_model.dart';
 import '../models/jobAuditSkuVariationDept_model.dart';
 import '../models/jobDepartment_model.dart';
+import '../models/jobErrorTypology_model.dart';
 import '../models/jobMasterFile_model.dart';
 import '../share_preferences/preferences.dart';
 
@@ -34,7 +35,7 @@ class DBProvider{
 
   Future<Database> initDB() async{
    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-   final path = join( documentsDirectory.path, 'TomiDB20.db' );
+   final path = join( documentsDirectory.path, 'TomiDB21.db' );
    print ( path );
 
    return await openDatabase(
@@ -121,6 +122,19 @@ class DBProvider{
               VALUE              TEXT                 NOT NULL,
               PRIMARY KEY (CUSTOMER_ID, STORE_ID, STOCK_DATE, PARAMETER_ID  )
             );
+      ''');
+      await db.execute('''
+                  create table ERROR_TYPOLOGY
+                  (
+                    CUSTOMER_ID        INTEGER              NOT NULL,
+                    STORE_ID           INTEGER              NOT NULL,
+                    STOCK_DATE         DATE                 NOT NULL,
+                    ERROR_ID           INTEGER              NOT NULL,
+                    DESCRIPTION        TEXT,
+                    IS_PROCESS_ERROR   INTEGER,
+                    IS_ELIGIBLE        INTEGER,
+                    PRIMARY KEY (CUSTOMER_ID, STORE_ID, STOCK_DATE, ERROR_ID)
+                  );
       ''');
       await db.execute('''
             create table SKU_VARIATION_DEPT_AUDIT
@@ -380,8 +394,9 @@ class DBProvider{
     } on DatabaseException
     catch(e) {
       //log(e.toString());
-      //print('Registro ya existe, actualizar :${jda.job_Details_Id}');
-       updateJobDetailAudit(jda);
+      if (g_auditType == 2) {
+        updateJobDetailAudit(jda);
+      }
     }
 
     return res;
@@ -453,6 +468,7 @@ class DBProvider{
     return res;
   }
 
+  /* Obtiene los tags de tomi, para ser procesados */
   Future<List<TagModel>> getTagsToAudit(String searchTag) async {
 
       var uri = '${Preferences.servicesURL}/api/Audit/GetTagsToAuditAsync/1/${g_customerId}/${g_storeId}/${g_stockDate}/0/${g_user}/${searchTag}';
@@ -684,7 +700,7 @@ DEPARTMENTS
   Future<void> downloadAuditorDepartmentSectionSkuToAudit() async {
 
     //GetAuditTagToProcessAsync/{operation:int}/{customerId:int}/{storeId:int}/{stockDate:DateTime}
-    var uri = '${Preferences.servicesURL}/api/Audit/GetAuditTagToProcessAsync/1/${g_customerId}/${g_storeId}/${g_stockDate}';
+    var uri = '${Preferences.servicesURL}/api/Audit/GetAuditTagToProcessTabletAsync/1/${g_customerId}/${g_storeId}/${g_stockDate}';
     var url = Uri.parse(uri);
     //print (uri);
     var response = await http.get(url);
@@ -694,12 +710,18 @@ DEPARTMENTS
     //List<jobAuditSkuVariationDept> list = parsedList.map((e) => jobAuditSkuVariationDept.fromTOMIDBJson(e)).toList();
     List<jobDetailAudit> list = parsedList.map((e) => jobDetailAudit.fromTomiDBJson(e)).toList();
 
+    if (g_auditType == 1 && g_user_rol == 'AUDITOR') {
+      deleteAllJobDetailAudit();
+      print ('Eliminar todos los registros de job detail audit');
+    }
+
     for(var i=0;i<list.length;i++){
       //print(list[i]);
       nuevoJobDetailAudit(list[i]);
     }
   }
 
+  /* Descarga los registros del tag selecionado para auditar y los guarda en la base de datos local*/
   Future<void> downloadTagsDetailToAudit() async {
     var uri = '${Preferences.servicesURL}/api/Audit/GetAuditTagList/1/${g_tagNumber}/${g_customerId}/${g_storeId}/${g_stockDate}/${g_user}';
     var url = Uri.parse(uri);
@@ -874,6 +896,68 @@ DEPARTMENTS
     return res;
   }
 
+  Future<List<Map<String, dynamic>>?> getErrorTypologies() async {
+      final db = await database;
+
+      final List<Map<String, dynamic?>>? maps = await db?.query('ERROR_TYPOLOGY',
+          columns:['ERROR_ID','DESCRIPTION'] ,
+          where:'CUSTOMER_ID = ? and STORE_ID = ? and STOCK_DATE = ? and IS_ELIGIBLE = ?',
+          whereArgs: [g_customerId, g_storeId, g_stockDate.toString().substring(0,10),1]);
+      /*
+
+      final res = await db?.query('SKU_VARIATION_DEPT_AUDIT', where: 'customer_Id = ? and store_Id = ? and stock_Date = ? and department_id = ? and section_id = ?',
+        whereArgs: [customerId, storeId, stockDate.toString().substring(0,10), department_id, section_id],
+        orderBy: orderBy,
+      );
+
+      create table ERROR_TYPOLOGY
+                  (
+                    CUSTOMER_ID        INTEGER              NOT NULL,
+                    STORE_ID           INTEGER              NOT NULL,
+                    STOCK_DATE         DATE                 NOT NULL,
+                    ERROR_ID           INTEGER              NOT NULL,
+                    DESCRIPTION        TEXT,
+                    IS_PROCESS_ERROR   INTEGER,
+                    IS_ELIGIBLE        INTEGER,
+                    PRIMARY KEY (CUSTOMER_ID, STORE_ID, STOCK_DATE, ERROR_ID)
+                  );
+       */
+
+      return maps;
+
+  }
+
+  Future<int> downloadErrorTypology() async{
+    //GetErrorTypology
+    final db = await database;
+    await db?.delete('ERROR_TYPOLOGY');
+
+    var i = 0;
+    var uri = '${Preferences.servicesURL}/api/ProgramTerminal/GetErrorTypology/${g_customerId}/${g_storeId}/${g_stockDate}';
+    var url = Uri.parse(uri);
+    var response = await http.get(url);
+    //print('Get ErrorTypology: ${json.decode(response.body)}');
+    final List parsedList = json.decode(response.body);
+    List<JobErrorTypology> list = parsedList.map((e) => JobErrorTypology.fromJson(e)).toList();
+
+    for(i=0;i<list.length;i++){
+      //print(list[i].description);
+      nuevoErrorTypology(list[i]);
+    }
+    return i;
+  }
+
+  Future<int?> nuevoErrorTypology(JobErrorTypology jda) async{
+    int? res = 0;
+    final db = await database;
+    try {
+      res = await db?.insert('ERROR_TYPOLOGY', jda.toJson());
+    } on DatabaseException
+    catch(e) {
+      //log('ALERT_PARAMETER already exist.${e.toString()}');
+    }
+    return res;
+  }
 
     Future<int> downloadAlerts() async{
     final db = await database;

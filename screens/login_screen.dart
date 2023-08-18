@@ -245,39 +245,40 @@ class _LoginScreenState extends State<LoginScreen> {
             g_auditType = loginResponseBody['auditType'].round();
             g_stockDate = DateTime.parse(loginResponseBody['stockDate']);
             g_user_rol = loginResponseBody['rol'];
-            //print('g_user_rol: ${g_user_rol}');
+            print('g_user_rol: ${g_user_rol}');
+            print('g_auditType: ${g_auditType}');
           });
 
           writeToLog('Login a registrar: ${g_user} - TipoAuditoria: ${g_auditType} - JOB: ${g_customerId}, ${g_storeId}, ${g_stockDate}');
 
           int totalDepartments = await DBProvider.db.downloadDepartments();
           int totalalerts = await DBProvider.db.downloadAlerts();
+          int ErrorTypologies = await DBProvider.db.downloadErrorTypology();
           int? inventoryManager = await DBProvider.db.downloadInventoryManager();
 
           //print('totalDepartments: ${totalDepartments}');
           //print('totalalerts: ${totalalerts}');
           //print('inventoryManager: ${inventoryManager}');
 
-          if (g_auditType == 1) {
+          if (g_auditType == 1) { // Si el tipo de auditoria es para Sodimac
             if (totalDepartments > 0 && totalalerts > 0) {
               JobAudit ja = JobAudit(userName: name,
                   inventoryKey: inventorykey,
                   created_At: DateTime.now());
               // Insertar usuario en la BD
               DBProvider.db.nuevoJobAudit(ja);
-
               // Seleccionar la pantalla de busqueda según el tipo de auditoría.
-
-              final route = MaterialPageRoute(
+              final tagSearchroute = MaterialPageRoute(
                   builder: (context) => const TagSearchScreen());
-              final department_route = MaterialPageRoute(
-                  builder: (context) => const DepartmentSearchScreen());
+              final auditor_route = MaterialPageRoute(
+                  builder: (context) => const AuditorListDetailsScreen());
 
-              if (g_auditType == 1)
-                Navigator.pushReplacement(context, route);
-              else
-                Navigator.pushReplacement(context, department_route);
-              //print('totalalerts');
+              if(g_user_rol == 'SUPERVISOR')
+                Navigator.pushReplacement(context, tagSearchroute);
+              else if(g_user_rol == 'AUDITOR'){
+                Navigator.pushReplacement(context, auditor_route);
+              }
+
             }
             else {
               showDialog(
@@ -325,9 +326,9 @@ class _LoginScreenState extends State<LoginScreen> {
               final auditor_route = MaterialPageRoute(
                   builder: (context) => const AuditorListDetailsScreen());
 
-              if (g_auditType == 1)
-                Navigator.pushReplacement(context, route);
-              else if(g_user_rol == 'SUPERVISOR')
+              //if (g_auditType == 1)
+              //  Navigator.pushReplacement(context, route);
+              if(g_user_rol == 'SUPERVISOR')
                 Navigator.pushReplacement(context, department_route);
               else if(g_user_rol == 'AUDITOR'){
                 //print('cargar pantalla AUDITOR');
@@ -379,9 +380,9 @@ class _LoginScreenState extends State<LoginScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadiusDirectional.circular(10)),
               title: const Text('Alert'),
-              content: Column(
+              content: const Column(
                 mainAxisSize: MainAxisSize.min,
-                children:  const [
+                children:  [
                   Text('Tomi services not available !!'),
                   SizedBox(height: 10),
                 ],

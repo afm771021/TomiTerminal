@@ -116,24 +116,7 @@ class DeleteForm extends StatelessWidget {
                                 sku: jdetailaudit.code,
                                 qty: jdetailaudit.quantity.round()),
                 SizedBox(height: 10,),
-                /*Text('# REC : ${jdetailaudit.job_Details_Id.round()}'),
-                SizedBox(height: 10,),
-                Text('# SKU : ${jdetailaudit.code}'),
-                SizedBox(height: 10,),
-                Text('# QTY : ${jdetailaudit.quantity.round()}'),
-                SizedBox(height: 10,),*/
-                /*TextFormField(
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    icon: Icon(Icons.numbers),
-                    labelText: 'New Quantity ',
-                  ),
-                  onChanged: (String? value){
-                    jdetailaudit.audit_New_Quantity = int.parse(value!) * 1.0;
-                  },
-                ),
-                SizedBox(height: 10,),*/
-                DropdownButtonFormField(
+                /*DropdownButtonFormField(
                   decoration: const InputDecoration(
                     icon: Icon(Icons.swipe_up),
                     //hintText: 'What do people call you?',
@@ -159,7 +142,7 @@ class DeleteForm extends StatelessWidget {
                       jdetailaudit.audit_Reason_Code = 2.0;
                     }
 
-                    /*if (value == 'Preconteo Tienda erróneo.'){
+                    if (value == 'Preconteo Tienda erróneo.'){
                       jdetailaudit.audit_Reason_Code = 1;
                     }
                     else if (value == 'Conteo Inicial Accurats erróneo'){
@@ -188,9 +171,46 @@ class DeleteForm extends StatelessWidget {
                     }
                     else if (value == 'corrección por Tablet, errónea en Sku.'){
                       jdetailaudit.audit_Reason_Code = 10;
-                    }*/
+                    }
                   },
-                ),
+                ),*/
+                FutureBuilder<List<Map<String, dynamic>>?>(
+                  future: DBProvider.db.getErrorTypologies(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else if (snapshot.hasData && snapshot.data != null) {
+                      List<Map<String, dynamic>> opciones = snapshot.data!;
+
+                      List<DropdownMenuItem<int>> dropdownItems = opciones.map((opcion) {
+                        int? valor = opcion['ERROR_ID'] as int?;
+                        String descripcion = opcion['DESCRIPTION'] as String;
+
+                        return DropdownMenuItem<int>(
+                          value: valor,
+                          child: Text(descripcion),
+                        );
+                      }).toList();
+
+                      return DropdownButtonFormField<int?>(
+                        decoration: const InputDecoration(
+                          icon: Icon(Icons.swipe_up),
+                          labelText: 'Reason Delete',
+                        ),
+                        items: dropdownItems,
+                        onChanged: (selectedValue) {
+                          jdetailaudit.audit_Reason_Code = selectedValue!.toDouble();
+                          print(jdetailaudit.audit_Reason_Code);
+                        },
+
+                      );
+                    } else {
+                      return Text('No hay datos disponibles');
+                    }
+                  },
+                )
               ],
             ),
           )

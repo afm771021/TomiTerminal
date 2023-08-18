@@ -43,6 +43,7 @@ class _TagListScreenState extends State<TagListScreen> {
                 setState(() {
                   g_tagNumber = tag.tag_number.round();
                 });
+                // Descarga los registros del tag seleccionado en pantalla y los inserta en la base local
                 DBProvider.db.downloadTagsDetailToAudit();
                 Navigator.pushReplacementNamed(context, 'TagListDetails');
               },
