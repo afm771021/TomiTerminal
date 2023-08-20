@@ -319,10 +319,10 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
       if (jobDetails[i].source_Action == 0){
         jobDetails[i].source_Action = 7;
       }
-      //print('validaJobDetail: Id:${jobDetails[i].job_Details_Id} Action: ${jobDetails[i].audit_Action} source_Action:${jobDetails[i].source_Action}');
+     // print('validaJobDetail: Id:${jobDetails[i].job_Details_Id} Action: ${jobDetails[i].audit_Action} source_Action:${jobDetails[i].source_Action}');
 
-      if (jobDetails[i].audit_Status != 4 && (jobDetails[i].audit_Action == 4 || jobDetails[i].audit_Action == 5 ||
-          jobDetails[i].audit_Action == 7 || jobDetails[i].audit_Action == 8 || jobDetails[i].audit_Action == 9)
+      if (jobDetails[i].audit_Status != 4 && (jobDetails[i].audit_Action == 2 || jobDetails[i].audit_Action == 3 ||
+          jobDetails[i].audit_Action == 4 )
           && jobDetails[i].sent == 0){
         jobDetailsAudit.add(jobDetails[i]);
       }
@@ -348,8 +348,6 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
       }
 
     }
-
-    //tipoerror = await AuditProcess(jobDetailsAudit,1,7);
 
     if (error > 0) {
       showDialog(
@@ -493,7 +491,7 @@ class _AuditorListDetailsScreenState extends State<AuditorListDetailsScreen> {
         'jobDetailsIds' : jobDetailsAudit,
         'auditorId' : g_user
       };
-      //print(' params:${json.encode(params)}');
+      print(' params:${json.encode(params)}');
       var response = await http.post(
           url,
           headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8',},
