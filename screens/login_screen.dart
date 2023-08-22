@@ -50,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> writeToLog(String log) async {
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/log${ DateFormat('yyyy-MM-dd').format(DateTime.now()).toString()}.txt');
-
+    g_logpath = file.path;
     final timestamp = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
     final logWithTimestamp = '[$timestamp] $log\n';
     await file.writeAsString(logWithTimestamp, mode: FileMode.append);
@@ -128,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           )
                       ),
                       const SizedBox(height: 50,),
-                      const Center(child: Text ('(Ver. 2.3.4)', style: TextStyle(fontSize: 10),)),
+                      const Center(child: Text ('(Ver. 2.3.7)', style: TextStyle(fontSize: 10),)),
                     ],
                   ),
                    if ( isLoading )
@@ -380,7 +380,7 @@ class _LoginScreenState extends State<LoginScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadiusDirectional.circular(10)),
               title: const Text('Alert'),
-              content: const Column(
+              content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children:  [
                   Text('Tomi services not available !!'),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:tomi_terminal_audit2/util/globalvariables.dart';
 import '../models/jobGetIndicators_model.dart';
 import '../providers/job_indicators_provider.dart';
 
@@ -25,48 +26,50 @@ class _CardTableState extends State<CardTable> {
       children: [
         Table(
           children:  [
-            TableRow(
+            if (g_customerId == 1)
+              TableRow(
+                  children: [
+                    _SingleCard(color:Colors.teal,
+                      icon: Icons.bar_chart,
+                      text: 'Total Departments',
+                      text2: jobIndicators.totalDepartments.round().toString(),
+                      text3: '',),
+                    _SingleCard(color:Colors.lightBlueAccent,
+                      icon: Icons.checklist,
+                      text: 'Released Departments',
+                      text2:  jobIndicators.releasedDepartments.round().toString(),
+                      text3: '',),
+                  ]
+              ),
+            if (g_customerId == 1)
+              TableRow(
+                  children: [
+                    _SingleCard(color:Colors.purple,
+                      icon: Icons.bar_chart,
+                      text: 'In Progress Departments',
+                      text2: jobIndicators.inProgressDepartments.round().toString(),
+                      text3: '',),
+                    _SingleCard(color:Colors.black38,
+                      icon: Icons.checklist,
+                      text: 'Completed Departments',
+                      text2:  jobIndicators.completedDepartments.round().toString(),
+                      text3: '',),
+                  ]
+              ),
+              TableRow(
                 children: [
-                  _SingleCard(color:Colors.teal,
-                    icon: Icons.bar_chart,
-                    text: 'Total Departments',
-                    text2: jobIndicators.totalDepartments.round().toString(),
-                    text3: '',),
-                  _SingleCard(color:Colors.lightBlueAccent,
-                    icon: Icons.checklist,
-                    text: 'Released Departments',
-                    text2:  jobIndicators.releasedDepartments.round().toString(),
-                    text3: '',),
+                  _SingleCard(color:Colors.orangeAccent,
+                              icon: Icons.bar_chart,
+                              text: 'Total Tags',
+                              text2: jobIndicators.totalTags.round().toString(),
+                              text3: '',),
+                  _SingleCard(color:Colors.pinkAccent,
+                              icon: Icons.checklist,
+                              text: 'Counted Tags',
+                              text2:  jobIndicators.countedTags.round().toString(),
+                              text3: 'Progress: ${(jobIndicators.countedTags * 100 / jobIndicators.totalTags ).toStringAsFixed(1)}%',),
                 ]
-            ),
-            TableRow(
-                children: [
-                  _SingleCard(color:Colors.purple,
-                    icon: Icons.bar_chart,
-                    text: 'In Progress Departments',
-                    text2: jobIndicators.inProgressDepartments.round().toString(),
-                    text3: '',),
-                  _SingleCard(color:Colors.black38,
-                    icon: Icons.checklist,
-                    text: 'Completed Departments',
-                    text2:  jobIndicators.completedDepartments.round().toString(),
-                    text3: '',),
-                ]
-            ),
-            TableRow(
-              children: [
-                _SingleCard(color:Colors.orangeAccent,
-                            icon: Icons.bar_chart,
-                            text: 'Total Tags',
-                            text2: jobIndicators.totalTags.round().toString(),
-                            text3: '',),
-                _SingleCard(color:Colors.pinkAccent,
-                            icon: Icons.checklist,
-                            text: 'Counted Tags',
-                            text2:  jobIndicators.countedTags.round().toString(),
-                            text3: 'Progress: ${(jobIndicators.countedTags * 100 / jobIndicators.totalTags ).toStringAsFixed(1)}%',),
-              ]
-            ),
+              ),
             TableRow(
                 children: [
                   _SingleCard(color:Colors.green,
@@ -82,20 +85,21 @@ class _CardTableState extends State<CardTable> {
                     text3: '',),
                 ]
             ),
-            TableRow(
-                children: [
-                  _SingleCard(color:Colors.purple,
-                    icon: Icons.checklist,
-                    text: 'Audited Tags',
-                    text2: jobIndicators.totalAuditedTags.round().toString(),
-                    text3: '',),
-                  _SingleCard(color:Colors.black38,
-                    icon: Icons.punch_clock_outlined,
-                    text: 'Audit tags in progress',
-                    text2: jobIndicators.auditInProgressTags.round().toString(),
-                    text3: '',),
-                ]
-            ),
+            if (g_customerId == 6)
+              TableRow(
+                  children: [
+                    _SingleCard(color:Colors.purple,
+                      icon: Icons.checklist,
+                      text: 'Audited Tags',
+                      text2: jobIndicators.totalAuditedTags.round().toString(),
+                      text3: '',),
+                    _SingleCard(color:Colors.black38,
+                      icon: Icons.punch_clock_outlined,
+                      text: 'Audit tags in progress',
+                      text2: jobIndicators.auditInProgressTags.round().toString(),
+                      text3: '',),
+                  ]
+              ),
             TableRow(
                 children: [
                   _SingleCard(color:Colors.orangeAccent,

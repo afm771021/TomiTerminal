@@ -18,4 +18,5 @@ int g_sectionNumber = 0;
 String g_user_rol = "";
 String g_im_password = "";
 String g_depatmentStartDate = "";
+String g_logpath = "";
 

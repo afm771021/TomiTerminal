@@ -326,6 +326,17 @@ class DBProvider{
     return maxRec![0]['count(*)'] as int?;
   }
 
+  Future<int?> countErrorTypologyRaw() async {
+    final db = await database;
+
+    final maxRec = await db?.rawQuery('''
+            select count(*) from ERROR_TYPOLOGY where CUSTOMER_ID = '${g_customerId}'
+                                                and STORE_ID = '${g_storeId}'
+                                                and STOCK_DATE = '${g_stockDate.toString().substring(0,10)}'
+            ''');
+    return maxRec![0]['count(*)'] as int?;
+  }
+
   Future<int?> countAlertRecordsRaw() async {
     final db = await database;
 
@@ -936,6 +947,7 @@ DEPARTMENTS
     var uri = '${Preferences.servicesURL}/api/ProgramTerminal/GetErrorTypology/${g_customerId}/${g_storeId}/${g_stockDate}';
     var url = Uri.parse(uri);
     var response = await http.get(url);
+
     //print('Get ErrorTypology: ${json.decode(response.body)}');
     final List parsedList = json.decode(response.body);
     List<JobErrorTypology> list = parsedList.map((e) => JobErrorTypology.fromJson(e)).toList();

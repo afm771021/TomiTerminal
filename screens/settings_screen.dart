@@ -20,6 +20,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late int maxMFR = 0;
   late int maxDER = 0;
   late int maxALR = 0;
+  late int maxERR = 0;
 
   @override
   void initState() {
@@ -35,6 +36,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     maxMFR = (await DBProvider.db.countMastedFileRecordsRaw())!;
     maxDER = (await DBProvider.db.countDepartmentsRecordsRaw())!;
     maxALR = (await DBProvider.db.countAlertRecordsRaw())!;
+    maxERR = (await DBProvider.db.countErrorTypologyRaw())!;
     setState(() {});
   }
 
@@ -317,6 +319,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     )
                 ),
                 const Divider(),
+                Visibility(
+                    visible: (g_login)?true:false,
+                    child:Row(
+                      children: [
+                        const SizedBox(width: 10,),
+                        Text('Error Typologies Records: ${maxERR.toString()}'),
+                      ],
+                    )
+                ),
+                // const Divider(),
+                // Visibility(
+                //     visible: (g_login)?true:false,
+                //     child:Row(
+                //       children: [
+                //         const SizedBox(width: 10,),
+                //         Text('LogPath: ${g_logpath}'),
+                //       ],
+                //     )
+                // ),
               ],
             ),
             if ( isLoading )
