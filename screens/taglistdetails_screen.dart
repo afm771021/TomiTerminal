@@ -326,6 +326,7 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
           'storeId': g_storeId,
           'stockDate' : g_stockDate.toString(),
           'tagNumber' : g_tagNumber,
+          'supervisorId' : g_user,
           'jobDetailAuditModel' : jobDetails
         };
         //print(' params:${json.encode(params)}');

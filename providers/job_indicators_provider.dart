@@ -16,6 +16,7 @@ class JobIndicatorsProvider extends ChangeNotifier{
                                       employeeProductivity: EmployeeProductivity(labels: [], series: []
                                       ),
                                       departments: [],
+                                      groupsAdvances: [],
                                       totalDepartments: 0,
                                       releasedDepartments: 0,
                                       inProgressDepartments: 0,

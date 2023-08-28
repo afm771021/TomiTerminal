@@ -20,6 +20,7 @@ class JobGetIndicators {
     required this.auditInProgressTags,
     required this.employeeProductivity,
     required this.departments,
+    required this.groupsAdvances,
     required this.totalDepartments,
     required this.releasedDepartments,
     required this.inProgressDepartments,
@@ -36,6 +37,7 @@ class JobGetIndicators {
   double auditInProgressTags;
   EmployeeProductivity employeeProductivity;
   List<Department> departments;
+  List<GroupsAdvance> groupsAdvances;
   double totalDepartments;
   double releasedDepartments;
   double inProgressDepartments;
@@ -52,6 +54,7 @@ class JobGetIndicators {
     auditInProgressTags: json["auditInProgressTags"],
     employeeProductivity: EmployeeProductivity.fromJson(json["employeeProductivity"]),
     departments: List<Department>.from(json["departments"].map((x) => Department.fromJson(x))),
+    groupsAdvances : List<GroupsAdvance>.from(json["groups"].map((x) => GroupsAdvance.fromJson(x))),
     totalDepartments: json["totalDepartments"] ?? 0,
     releasedDepartments: json["releasedDepartments"] ?? 0,
     inProgressDepartments: json["inProgressDepartments"] ?? 0,
@@ -69,10 +72,44 @@ class JobGetIndicators {
     "auditInProgressTags": auditInProgressTags,
     "employeeProductivity": employeeProductivity.toJson(),
     "departments": List<dynamic>.from(departments.map((x) => x.toJson())),
+    "groupsAdvances": List<dynamic>.from(groupsAdvances.map((x) => x.toJson())),
     "totalDepartments": totalDepartments,
     "releasedDepartments": releasedDepartments,
     "inProgressDepartments": inProgressDepartments,
     "completedDepartments": completedDepartments,
+  };
+}
+
+class GroupsAdvance
+{
+  GroupsAdvance({
+    required this.groupName,
+    required this.advance,
+    required this.countedTags,
+    required this.totalTags,
+    required this.pendingTags,
+  });
+  
+  String groupName ;
+  double advance ;
+  double countedTags ;
+  double totalTags ;
+  double pendingTags ;
+
+  factory GroupsAdvance.fromJson(Map<String, dynamic> json) => GroupsAdvance(
+    groupName: json["groupName"],
+    advance: json["advance"],
+    countedTags: json["countedTags"].toDouble(),
+    totalTags: json["totalTags"].toDouble(),
+    pendingTags: json["pendingTags"].toDouble(),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "groupName": groupName,
+    "advance": advance,
+    "countedTags": countedTags,
+    "totalTags": totalTags,
+    "pendingTags": pendingTags,
   };
 }
 

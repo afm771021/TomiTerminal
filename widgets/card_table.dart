@@ -135,8 +135,128 @@ class _CardTableState extends State<CardTable> {
             )
           ],
         ),
+        Table(
+          children:   [
+            TableRow(
+                children : [
+                  _SingleCardGroupsAdvances(
+                    color:Colors.green,
+                    icon: Icons.bar_chart,
+                    text: 'Group Advance',
+                    indicators: jobIndicators,
+                  ),
+                ]
+            )
+          ],
+        ),
 
       ],
+    );
+  }
+}
+
+class _SingleCardGroupsAdvances extends StatelessWidget {
+  const _SingleCardGroupsAdvances({Key? key, required this.icon, required this.color, required this.text, required this.indicators}) : super(key: key);
+
+  final IconData icon;
+  final Color color;
+  final String text;
+  final JobGetIndicators indicators;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<String> encabezados = [
+      '                    Group '+
+      '                                     %Progress'+
+      '                                   Tags Counted'+
+      '                                 Total Tags'+
+      '                                 Missing Tags',
+    ];
+    return Container(
+      margin: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color.fromRGBO(62, 66, 107, 0.7),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children:  [
+          CircleAvatar(
+            backgroundColor: color,
+            radius: 30,
+            child: Icon (icon, size: 40, color: Colors.white,),
+          ),
+          const SizedBox(height: 10,),
+          Text (text ,style: const TextStyle(color: Colors.white, fontSize: 12),),
+          const Divider(),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: (indicators != null)
+                ?encabezados.length + indicators.groupsAdvances.length
+                :0,
+            itemBuilder: (context, index) {
+                if (index < encabezados.length) {
+                    return ListTile(
+                                    title: Text(
+                                    encabezados[index],
+                                    style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    fontSize: 18,),
+                                    ),
+                           );
+                    }
+                else{
+                  final elementoIndex = index - encabezados.length;
+                  final elemento = indicators.groupsAdvances[elementoIndex];
+                    return ListTile(
+                      title:
+                      Table(
+                        children: [
+                          TableRow(
+                            children : [
+                              Center(
+                                child: Text((indicators != null)
+                                    ?'${elemento.groupName}'
+                                    :'',style: const TextStyle(color: Colors.white, fontSize: 14),
+                                ),
+                              ),
+                              Center(
+                                child: Text((indicators != null)
+                                    ?'${elemento.advance}%'
+                                    :'',style: const TextStyle(color: Colors.white, fontSize: 14),
+                                ),
+                              ),
+                              Center(
+                                child:Text((indicators != null)
+                                    ?'${elemento.countedTags}'
+                                    :'',style: const TextStyle(color: Colors.white, fontSize: 14),
+                                ),
+                              ),
+                              Center(
+                                child: Text((indicators != null)
+                                    ?'${elemento.totalTags}'
+                                    :'',style: const TextStyle(color: Colors.white, fontSize: 14),
+                                ),
+                              ),
+                              Center(
+                                child: Text((indicators != null)
+                                    ?'${elemento.pendingTags}'
+                                    :'',style: const TextStyle(color: Colors.white, fontSize: 14),
+                                ),
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+
+                    );
+                }
+            }
+          )
+        ],
+      ),
     );
   }
 }
