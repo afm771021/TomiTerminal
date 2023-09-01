@@ -72,9 +72,12 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
                           itemCount: jobDetails.length,
                           itemBuilder: (context, index) //=> ProductCard()
                           {
+                            int res = determine_alert(jobDetails[index], g_alertQuantity, g_alertAmount);
+
                             return Card(
-                              color: (jobDetails[index].audit_Action == null ||
-                                  jobDetails[index].audit_Action == 0) ? Colors.grey[200] :
+                              color:
+                              (res > 0) ? Colors.purple[200]:
+                              (jobDetails[index].audit_Action == null || jobDetails[index].audit_Action == 0) ? Colors.grey[200] :
                               (jobDetails[index].audit_Action == 1) ? Colors.green[200] :
                               (jobDetails[index].audit_Action == 2) ? Colors.amber[200] :
                               (jobDetails[index].audit_Action == 3) ? Colors.blue[200] :
@@ -404,6 +407,38 @@ class _TagListDetailsScreenState extends State<TagListDetailsScreen> {
 
     return tipoerror;
   }
+
+  int determine_alert(jobDetailAudit jdetailaudit, int quantity, int amount) {
+    bool diferencequantity = false;
+    bool diferenceamount = false;
+
+    if (quantity > 0) {
+      if ((jdetailaudit.audit_Action == 3 || jdetailaudit.audit_Action == 4)  && jdetailaudit.quantity > quantity)
+        diferencequantity = true;
+      else if ((jdetailaudit.quantity - jdetailaudit.audit_New_Quantity).abs() > quantity)
+        diferencequantity = true;
+     // print('cantidad: $quantity');
+    }
+
+    if (amount > 0){
+      if ((jdetailaudit.audit_Action == 3 || jdetailaudit.audit_Action == 4)  && jdetailaudit.quantity * jdetailaudit.sale_Price > amount)
+        diferenceamount = true;
+      else if (((jdetailaudit.quantity * jdetailaudit.sale_Price) - (jdetailaudit.audit_New_Quantity * jdetailaudit.sale_Price)).abs() > amount)
+        diferenceamount = true;
+     // print('monto: $amount');
+    }
+
+    if (!diferenceamount && !diferencequantity)
+      return 0;
+    if (diferenceamount && diferencequantity)
+      return 1;
+    if (diferenceamount && !diferencequantity)
+      return 2;
+    if (!diferenceamount && diferencequantity)
+      return 3;
+    return -1;
+  }
+
 }
 
 class _ProductDetails extends StatelessWidget {

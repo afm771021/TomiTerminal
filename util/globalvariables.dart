@@ -19,4 +19,6 @@ String g_user_rol = "";
 String g_im_password = "";
 String g_depatmentStartDate = "";
 String g_logpath = "";
+int g_alertQuantity = 0;
+int g_alertAmount = 0;
 

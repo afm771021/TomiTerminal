@@ -986,6 +986,10 @@ DEPARTMENTS
     for(i=0;i<list.length;i++){
       nuevoAlert(list[i]);
     }
+
+    g_alertQuantity = (await DBProvider.db.alert_Higher_Quantity())!;
+    g_alertAmount = (await DBProvider.db.alert_Higher_Amount())!;
+
     return i;
   }
 
